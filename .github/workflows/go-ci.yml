@@ -1,0 +1,46 @@
+name: Go CI
+
+on:
+  push:
+    branches:
+      - "**"
+
+# don't waste CI time by cancelling previous workflow on the same branch
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  GO_VERSION: "1.23"
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: $GO_VERSION
+
+      - name: install go-task
+        run: go install github.com/go-task/task/v3/cmd/task@latest
+
+      - uses: golangci/golangci-lint-action@v6
+        with:
+          version: v1.61
+
+  test:
+    runs-on: ubuntu-latest
+    needs: [build]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: $GO_VERSION
+
+      - name: install go-task
+        run: go install github.com/go-task/task/v3/cmd/task@latest
+
+      - run: go-task test
