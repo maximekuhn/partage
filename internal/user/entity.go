@@ -19,5 +19,5 @@ func NewUser(
 	email valueobjects.Email,
 	createdAt time.Time,
 ) *User {
-	return &User{id, nick, email, createdAt}
+	return &User{id, nick, email, createdAt.UTC()}
 }
