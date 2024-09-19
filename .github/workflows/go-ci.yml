@@ -21,10 +21,7 @@ jobs:
 
       - uses: actions/setup-go@v5
         with:
-          go-version: $GO_VERSION
-
-      - name: install go-task
-        run: go install github.com/go-task/task/v3/cmd/task@latest
+          go-version: ${{ env.GO_VERSION }}
 
       - uses: golangci/golangci-lint-action@v6
         with:
@@ -37,9 +34,10 @@ jobs:
 
       - uses: actions/setup-go@v5
         with:
-          go-version: $GO_VERSION
+          go-version: ${{ env.GO_VERSION }}
 
       - name: install go-task
-        run: go install github.com/go-task/task/v3/cmd/task@latest
+        # https://taskfile.dev/installation/#install-script
+        run: sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d -b /usr/local/bin
 
-      - run: go-task test
+      - run: task test
