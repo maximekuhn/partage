@@ -1,15 +1,28 @@
 package settlement
 
+import (
+	"fmt"
+)
+
 type Expense struct {
 	amount       uint
 	paidBy       string
 	participants []string // payer should not be in participants
 }
 
+func NewExpense(amount uint, paidBy string, participants []string) (*Expense, error) {
+	for _, p := range participants {
+		if p == paidBy {
+			return nil, fmt.Errorf("%v can't be the payer and a participant at the same time", p)
+		}
+	}
+	return &Expense{amount, paidBy, participants}, nil
+}
+
 type Debt struct {
-	amount uint
-	from   string
-	to     string
+	Amount uint
+	From   string
+	To     string
 }
 
 // Settle accepts a list of expenses and returns all debts
@@ -39,9 +52,9 @@ func Settle(expenses []Expense) []Debt {
 		amount := min(credBalance, -debBalance)
 
 		debts = append(debts, Debt{
-			amount: uint(amount),
-			from:   deb,
-			to:     cred,
+			Amount: uint(amount),
+			From:   deb,
+			To:     cred,
 		})
 
 		credNewBalance := credBalance - amount

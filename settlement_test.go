@@ -2,8 +2,68 @@ package settlement
 
 import (
 	"fmt"
+	"slices"
 	"testing"
 )
+
+func TestExpenseCtor(t *testing.T) {
+	tests := []struct {
+		title        string
+		amount       uint
+		paidBy       string
+		participants []string
+		shouldErr    bool
+	}{
+		{
+			title:        "ok",
+			amount:       10,
+			paidBy:       "alice",
+			participants: []string{"bob", "toto"},
+			shouldErr:    false,
+		},
+		{
+			title:        "err payer in participants",
+			amount:       10,
+			paidBy:       "alice",
+			participants: []string{"alice", "bob", "toto"},
+			shouldErr:    true,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.title, func(t *testing.T) {
+			e, err := NewExpense(test.amount, test.paidBy, test.participants)
+
+			if test.shouldErr && err != nil {
+				return
+			}
+
+			if !test.shouldErr && err != nil {
+				t.Errorf("NewExpense(): expected no error got %v", err)
+			}
+
+			if test.shouldErr && err == nil {
+				t.Error("NewExpense(): expected an error got nothing")
+			}
+
+			if e.amount != test.amount {
+				t.Errorf("NewExpense(): expected amount %v got %v", test.amount, e.amount)
+			}
+
+			if e.paidBy != test.paidBy {
+				t.Errorf("NewExpense(): expected paidBy %v got %v", test.paidBy, e.paidBy)
+			}
+
+			if !slicesEqual(e.participants, test.participants) {
+				t.Errorf(
+					"NewExpense(): expected participants %v got %v",
+					test.participants, e.participants,
+				)
+			}
+
+		})
+	}
+}
 
 func TestSettle(t *testing.T) {
 	tests := []struct {
@@ -29,9 +89,9 @@ func TestSettle(t *testing.T) {
 			},
 			debts: []Debt{
 				{
-					amount: 5,
-					from:   "alice",
-					to:     "bob",
+					Amount: 5,
+					From:   "alice",
+					To:     "bob",
 				},
 			},
 		},
@@ -64,14 +124,14 @@ func TestSettle(t *testing.T) {
 			},
 			debts: []Debt{
 				{
-					amount: 10,
-					from:   "alice",
-					to:     "bob",
+					Amount: 10,
+					From:   "alice",
+					To:     "bob",
 				},
 				{
-					amount: 10,
-					from:   "toto",
-					to:     "bob",
+					Amount: 10,
+					From:   "toto",
+					To:     "bob",
 				},
 			},
 		},
@@ -92,14 +152,14 @@ func TestSettle(t *testing.T) {
 			},
 			debts: []Debt{
 				{
-					amount: 4,
-					from:   "toto",
-					to:     "bob",
+					Amount: 4,
+					From:   "toto",
+					To:     "bob",
 				},
 				{
-					amount: 2,
-					from:   "alice",
-					to:     "bob",
+					Amount: 2,
+					From:   "alice",
+					To:     "bob",
 				},
 			},
 		},
@@ -112,7 +172,7 @@ func TestSettle(t *testing.T) {
 			got := toMap(debts)
 			expected := toMap(test.debts)
 
-			if !compareMaps(expected, got) {
+			if !mapsEqual(expected, got) {
 				t.Errorf("Settle(): expected %v got %v", expected, got)
 			}
 		})
@@ -124,14 +184,14 @@ func toMap(debts []Debt) map[string]uint {
 	hs := make(map[string]uint)
 
 	for _, debt := range debts {
-		k := fmt.Sprintf("%s -> %s", debt.from, debt.to)
-		hs[k] = debt.amount
+		k := fmt.Sprintf("%s -> %s", debt.From, debt.To)
+		hs[k] = debt.Amount
 	}
 
 	return hs
 }
 
-func compareMaps(l map[string]uint, r map[string]uint) bool {
+func mapsEqual(l map[string]uint, r map[string]uint) bool {
 	if len(l) != len(r) {
 		return false
 	}
@@ -142,6 +202,23 @@ func compareMaps(l map[string]uint, r map[string]uint) bool {
 			return false
 		}
 		if vr != vl {
+			return false
+		}
+	}
+
+	return true
+}
+
+func slicesEqual(l []string, r []string) bool {
+	if len(l) != len(r) {
+		return false
+	}
+
+	slices.Sort(l)
+	slices.Sort(r)
+
+	for i, v := range l {
+		if r[i] != v {
 			return false
 		}
 	}
