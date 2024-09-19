@@ -11,15 +11,30 @@ tasks:
     cmds:
       - golangci-lint run
 
-  build:
-    desc: Build all executables
+  templ:
+    internal: true
     cmds:
       - templ generate
+
+  tailwind:
+    internal: true
+    cmds:
       - npx tailwindcss -i ./internal/app/web/tailwind.css -o ./internal/app/web/static/output.css
-      - go build -v -o bin/webserver cmd/web/main.go
+
+  build:
+    desc: Build all executables
+    deps: [templ, tailwind]
+    cmds:
+      - go build -v -o bin/web cmd/web/main.go
 
   clean:
     desc: Clean project
     cmds:
       - go clean
       - rm -rf bin/
+
+  "run:web":
+    desc: Run webserver
+    deps: [build]
+    cmds:
+      - air
