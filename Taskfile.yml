@@ -10,3 +10,16 @@ tasks:
     desc: Run linter
     cmds:
       - golangci-lint run
+
+  build:
+    desc: Build all executables
+    cmds:
+      - templ generate
+      - npx tailwindcss -i ./internal/app/web/tailwind.css -o ./internal/app/web/static/output.css
+      - go build -v -o bin/webserver cmd/web/main.go
+
+  clean:
+    desc: Clean project
+    cmds:
+      - go clean
+      - rm -rf bin/
