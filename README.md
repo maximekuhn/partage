@@ -6,6 +6,7 @@
 - [golangci-lint](https://golangci-lint.run/)
 - [go-temp](https://templ.guide/quick-start/installation)
 - [nodejs](https://nodejs.org/en)
+- [air](https://github.com/air-verse/air)
 
 List all available tasks:
 ```shell

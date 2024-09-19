@@ -19,6 +19,6 @@ func NewServer(us *user.Service) *Server {
 func (s *Server) Run() error {
 	// serve static files
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("./internal/app/web/static"))))
-	http.Handle("/home", templ.Handler(views.Page("Home")))
+	http.Handle("/", templ.Handler(views.Page("Home")))
 	return http.ListenAndServe(":8000", nil)
 }
