@@ -1,12 +1,21 @@
 package sqlite
 
-import "database/sql"
+import (
+	"context"
+	"database/sql"
+	"time"
+)
 
+// ApplyMigrations creates all SQLite tables and apply configurations.
+// An internal [context.Context] is used with a timeout of 10 seconds.
 func ApplyMigrations(db *sql.DB) error {
-	return createUserTable(db)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	return createUserTable(db, ctx)
 }
 
-func createUserTable(db *sql.DB) error {
+func createUserTable(db *sql.DB, ctx context.Context) error {
 	query := `
     CREATE TABLE IF NOT EXISTS user (
         id TEXT PRIMARY KEY,
@@ -16,6 +25,6 @@ func createUserTable(db *sql.DB) error {
         UNIQUE(id, nickname)
     )
     `
-	_, err := db.Exec(query)
+	_, err := db.ExecContext(ctx, query)
 	return err
 }

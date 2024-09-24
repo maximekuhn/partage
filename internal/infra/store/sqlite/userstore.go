@@ -26,20 +26,20 @@ func NewSQLiteUserStore(db *sql.DB) *SQLiteUserStore {
 	return &SQLiteUserStore{db}
 }
 
-func (s *SQLiteUserStore) Save(_ context.Context, u *user.User) error {
+func (s *SQLiteUserStore) Save(ctx context.Context, u *user.User) error {
 	query := `
     INSERT INTO user (id, nickname, email, created_at) VALUES (?, ?, ?, ?)
     `
-	_, err := s.db.Exec(query, u.ID.String(), u.Nick.String(), u.Email.String(), u.CreatedAt)
+	_, err := s.db.ExecContext(ctx, query, u.ID.String(), u.Nick.String(), u.Email.String(), u.CreatedAt)
 	return err
 }
 
-func (s *SQLiteUserStore) GetByID(_ context.Context, id user.ID) (*user.User, bool, error) {
+func (s *SQLiteUserStore) GetByID(ctx context.Context, id user.ID) (*user.User, bool, error) {
 	query := `
     SELECT id, nickname, email, created_at FROM user WHERE id = ?
     `
 	var su sqliteUser
-	err := s.db.QueryRow(query, id.String()).Scan(&su.id, &su.nickname, &su.email, &su.createdAt)
+	err := s.db.QueryRowContext(ctx, query, id.String()).Scan(&su.id, &su.nickname, &su.email, &su.createdAt)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, false, nil
