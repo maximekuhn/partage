@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/maximekuhn/partage/internal/common/valueobjects"
-	"github.com/maximekuhn/partage/internal/user"
+	"github.com/maximekuhn/partage/internal/core/common/valueobjects"
+	"github.com/maximekuhn/partage/internal/core/user"
 )
 
 func TestSave(t *testing.T) {

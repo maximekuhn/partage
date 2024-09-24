@@ -3,7 +3,7 @@ package user
 import (
 	"time"
 
-	"github.com/maximekuhn/partage/internal/common/valueobjects"
+	"github.com/maximekuhn/partage/internal/core/common/valueobjects"
 )
 
 type User struct {

@@ -5,7 +5,7 @@ import (
 
 	"github.com/a-h/templ"
 	"github.com/maximekuhn/partage/internal/app/web/views"
-	"github.com/maximekuhn/partage/internal/user"
+	"github.com/maximekuhn/partage/internal/core/user"
 )
 
 type Server struct {
