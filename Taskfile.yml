@@ -38,3 +38,8 @@ tasks:
     deps: [build]
     cmds:
       - air
+
+  fmt:
+    desc: Format go code
+    cmds:
+      - gofmt -l -s -w .
