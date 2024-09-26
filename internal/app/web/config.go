@@ -8,6 +8,6 @@ type ServerConfig struct {
 
 func DefaultServerConfig() ServerConfig {
 	return ServerConfig{
-		DBFilepath: "/tmp/partage/db.sqlite3",
+		DBFilepath: "/tmp/partage.sqlite3",
 	}
 }

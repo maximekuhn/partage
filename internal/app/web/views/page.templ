@@ -1,6 +1,6 @@
 package views
 
-templ Page(title string) {
+templ Page(title string, body templ.Component) {
 	<!DOCTYPE html>
 	<html>
 		<head>
@@ -9,9 +9,7 @@ templ Page(title string) {
 			<title>{ title }</title>
 		</head>
 		<body>
-			<h1 class="text-red-500 text-4xl">
-				Hello, it's working!!! :)
-			</h1>
+			@body
 		</body>
 	</html>
 }
