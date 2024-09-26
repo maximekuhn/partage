@@ -28,7 +28,7 @@ func NewCreateUserHandler(
 	return &CreateUserHandler{uidp, dtp, userrepo}
 }
 
-// Handle creates a new user.
+// Handle creates a new user and return the id.
 // If a non-nil error is returned, id must be considered invalid.
 func (h *CreateUserHandler) Handle(ctx context.Context, cmd CreateUser) (valueobject.UserID, error) {
 	id := h.uidp.Provide()

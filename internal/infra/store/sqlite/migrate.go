@@ -30,7 +30,7 @@ func createUserTable(ctx context.Context, db *sql.DB) error {
         nickname TEXT NOT NULL,
         email TEXT NOT NULL,
         created_at DATE NOT NULL,
-        UNIQUE(id, nickname)
+        UNIQUE(email, nickname)
     )
     `
 	_, err := db.ExecContext(ctx, query)

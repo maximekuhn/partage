@@ -4,10 +4,12 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
 	"github.com/maximekuhn/partage/internal/core/entity"
+	"github.com/maximekuhn/partage/internal/core/store"
 	"github.com/maximekuhn/partage/internal/core/valueobject"
 )
 
@@ -31,7 +33,13 @@ func (s *SQLiteUserStore) Save(ctx context.Context, u *entity.User) error {
     INSERT INTO user (id, nickname, email, created_at) VALUES (?, ?, ?, ?)
     `
 	_, err := s.db.ExecContext(ctx, query, u.ID.String(), u.Nickname.String(), u.Email.String(), u.CreatedAt)
-	return err
+	if err != nil {
+		if strings.Contains(err.Error(), "UNIQUE constraint") {
+			return store.ErrUserStoreDuplicate
+		}
+		return err
+	}
+	return nil
 }
 
 func (s *SQLiteUserStore) GetByID(ctx context.Context, id valueobject.UserID) (*entity.User, bool, error) {

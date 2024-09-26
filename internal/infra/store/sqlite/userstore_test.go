@@ -8,6 +8,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/maximekuhn/partage/internal/core/entity"
+	"github.com/maximekuhn/partage/internal/core/store"
 	"github.com/maximekuhn/partage/internal/core/valueobject"
 )
 
@@ -23,6 +24,25 @@ func TestSave(t *testing.T) {
 	if err != nil {
 		t.Errorf("Save(): expected no error got %v", err)
 	}
+}
+
+func TestSaveDuplicate(t *testing.T) {
+	db := CreateTmpDB()
+	defer db.Close()
+
+	s := NewSQLiteUserStore(db)
+
+	u := createUser("toto", "toto@gmail.com")
+	err := s.Save(context.TODO(), u)
+	if err != nil {
+		t.Errorf("Save(): expected no error got %v", err)
+	}
+
+	err = s.Save(context.TODO(), u)
+	if err != store.ErrUserStoreDuplicate {
+		t.Errorf("Save(): expected ErrUserStoreDuplicate got %v", err)
+	}
+
 }
 
 func TestGet(t *testing.T) {
