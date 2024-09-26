@@ -7,7 +7,6 @@ import (
 )
 
 func main() {
-	// FIXME: passing a nil will break, doing this for tmp testing...
-	s := web.NewServer(nil)
+	s := web.NewServer()
 	log.Fatal(s.Run())
 }

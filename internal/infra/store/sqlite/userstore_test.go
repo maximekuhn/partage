@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/maximekuhn/partage/internal/core/common/valueobjects"
-	"github.com/maximekuhn/partage/internal/core/user"
+	"github.com/maximekuhn/partage/internal/core/entity"
+	"github.com/maximekuhn/partage/internal/core/valueobject"
 )
 
 func TestSave(t *testing.T) {
@@ -50,19 +50,19 @@ func TestGet(t *testing.T) {
 
 // createUser returns a pointer to a User.
 // Panics if one field could not be transformed into a valid value objects
-func createUser(nickname, email string) *user.User {
-	id, err := user.NewID(uuid.New())
+func createUser(nickname, email string) *entity.User {
+	id, err := valueobject.NewUserID(uuid.New())
 	if err != nil {
 		panic(err)
 	}
-	nn, err := user.NewNickname(nickname)
+	nn, err := valueobject.NewNickname(nickname)
 	if err != nil {
 		panic(err)
 	}
-	em, err := valueobjects.NewEmail(email)
+	em, err := valueobject.NewEmail(email)
 	if err != nil {
 		panic(err)
 	}
 	createdAt := time.Now()
-	return user.NewUser(id, nn, em, createdAt)
+	return entity.NewUser(id, em, nn, createdAt)
 }

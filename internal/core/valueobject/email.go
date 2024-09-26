@@ -1,4 +1,4 @@
-package valueobjects
+package valueobject
 
 type Email struct {
 	email string

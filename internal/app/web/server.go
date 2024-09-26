@@ -5,15 +5,13 @@ import (
 
 	"github.com/a-h/templ"
 	"github.com/maximekuhn/partage/internal/app/web/views"
-	"github.com/maximekuhn/partage/internal/core/user"
 )
 
 type Server struct {
-	us *user.Service
 }
 
-func NewServer(us *user.Service) *Server {
-	return &Server{us}
+func NewServer() *Server {
+	return &Server{}
 }
 
 func (s *Server) Run() error {

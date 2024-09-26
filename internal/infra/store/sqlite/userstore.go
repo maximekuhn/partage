@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/maximekuhn/partage/internal/core/common/valueobjects"
-	"github.com/maximekuhn/partage/internal/core/user"
+	"github.com/maximekuhn/partage/internal/core/entity"
+	"github.com/maximekuhn/partage/internal/core/valueobject"
 )
 
 type SQLiteUserStore struct {
@@ -26,15 +26,15 @@ func NewSQLiteUserStore(db *sql.DB) *SQLiteUserStore {
 	return &SQLiteUserStore{db}
 }
 
-func (s *SQLiteUserStore) Save(ctx context.Context, u *user.User) error {
+func (s *SQLiteUserStore) Save(ctx context.Context, u *entity.User) error {
 	query := `
     INSERT INTO user (id, nickname, email, created_at) VALUES (?, ?, ?, ?)
     `
-	_, err := s.db.ExecContext(ctx, query, u.ID.String(), u.Nick.String(), u.Email.String(), u.CreatedAt)
+	_, err := s.db.ExecContext(ctx, query, u.ID.String(), u.Nickname.String(), u.Email.String(), u.CreatedAt)
 	return err
 }
 
-func (s *SQLiteUserStore) GetByID(ctx context.Context, id user.ID) (*user.User, bool, error) {
+func (s *SQLiteUserStore) GetByID(ctx context.Context, id valueobject.UserID) (*entity.User, bool, error) {
 	query := `
     SELECT id, nickname, email, created_at FROM user WHERE id = ?
     `
@@ -51,20 +51,20 @@ func (s *SQLiteUserStore) GetByID(ctx context.Context, id user.ID) (*user.User, 
 	if err != nil {
 		return nil, false, err
 	}
-	id, err = user.NewID(idUUID)
+	id, err = valueobject.NewUserID(idUUID)
 	if err != nil {
 		return nil, false, err
 	}
-	nn, err := user.NewNickname(su.nickname)
+	nn, err := valueobject.NewNickname(su.nickname)
 	if err != nil {
 		return nil, false, err
 	}
-	em, err := valueobjects.NewEmail(su.email)
+	em, err := valueobject.NewEmail(su.email)
 	if err != nil {
 		return nil, false, err
 	}
 
-	u := user.NewUser(id, nn, em, su.createdAt)
+	u := entity.NewUser(id, em, nn, su.createdAt)
 
 	return u, true, nil
 }
