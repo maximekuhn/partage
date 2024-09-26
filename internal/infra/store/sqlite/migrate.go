@@ -12,10 +12,18 @@ func ApplyMigrations(db *sql.DB) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	return createUserTable(db, ctx)
+	if err := createUserTable(ctx, db); err != nil {
+		return err
+	}
+
+	if err := createAuthTable(ctx, db); err != nil {
+		return err
+	}
+
+	return nil
 }
 
-func createUserTable(db *sql.DB, ctx context.Context) error {
+func createUserTable(ctx context.Context, db *sql.DB) error {
 	query := `
     CREATE TABLE IF NOT EXISTS user (
         id TEXT PRIMARY KEY,
@@ -23,6 +31,17 @@ func createUserTable(db *sql.DB, ctx context.Context) error {
         email TEXT NOT NULL,
         created_at DATE NOT NULL,
         UNIQUE(id, nickname)
+    )
+    `
+	_, err := db.ExecContext(ctx, query)
+	return err
+}
+
+func createAuthTable(ctx context.Context, db *sql.DB) error {
+	query := `
+    CREATE TABLE IF NOT EXISTS auth (
+        user_id TEXT PRIMARY KEY,
+        hashed_password BLOB NOT NULL
     )
     `
 	_, err := db.ExecContext(ctx, query)
