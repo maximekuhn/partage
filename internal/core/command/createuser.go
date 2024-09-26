@@ -5,7 +5,7 @@ import (
 
 	"github.com/maximekuhn/partage/internal/core/contract"
 	"github.com/maximekuhn/partage/internal/core/entity"
-	"github.com/maximekuhn/partage/internal/core/repositories"
+	"github.com/maximekuhn/partage/internal/core/store"
 	"github.com/maximekuhn/partage/internal/core/valueobject"
 )
 
@@ -17,13 +17,13 @@ type CreateUser struct {
 type CreateUserHandler struct {
 	uidp     contract.UserIDProvider
 	dtp      contract.DatetimeProvider
-	userrepo repositories.UserRepo
+	userrepo store.UserStore
 }
 
 func NewCreateUserHandler(
 	uidp contract.UserIDProvider,
 	dtp contract.DatetimeProvider,
-	userrepo repositories.UserRepo,
+	userrepo store.UserStore,
 ) *CreateUserHandler {
 	return &CreateUserHandler{uidp, dtp, userrepo}
 }

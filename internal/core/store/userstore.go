@@ -1,4 +1,4 @@
-package repositories
+package store
 
 import (
 	"context"
@@ -7,7 +7,7 @@ import (
 	"github.com/maximekuhn/partage/internal/core/valueobject"
 )
 
-type UserRepo interface {
+type UserStore interface {
 	Save(ctx context.Context, u *entity.User) error
 	GetByID(ctx context.Context, id valueobject.UserID) (*entity.User, bool, error)
 }
