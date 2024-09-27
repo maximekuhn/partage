@@ -57,4 +57,5 @@ jobs:
 
       - name: check go code format
         shell: bash
-        run: [ $(task fmtcheck | wc -l) -eq 0 ] && exit 0 || exit 1
+        run: | 
+          [ $(task fmtcheck | wc -l) -eq 0 ] && exit 0 || exit 1
