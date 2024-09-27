@@ -127,12 +127,12 @@ func (s *Server) handleLoginUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	jwt, err := s.authSvc.GenerateJWT(u.ID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	w.WriteHeader(http.StatusOK)
-
-	// 1. get user by email to get userID (new query)
-	// 2. get hashed password (auth service)
-	// 3. verify password (auth svc)
-	// 4. generate jwt (auth svc)
-	// 5. return jwt + index page
-
+	fmt.Fprintf(w, "jwt: %s", jwt)
 }

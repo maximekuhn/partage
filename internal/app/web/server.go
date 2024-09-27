@@ -35,9 +35,15 @@ func NewServer(config ServerConfig) (*Server, error) {
 		return nil, err
 	}
 
+	jwtHelper, err := auth.NewJWTHelper(config.JWTSignatureKey)
+	if err != nil {
+		return nil, err
+	}
+
 	authSvc := auth.NewAuthService(
 		auth.NewBcryptPasswordHasher(),
 		sqlite.NewSQLiteAuthStore(db),
+		jwtHelper,
 	)
 
 	userstore := sqlite.NewSQLiteUserStore(db)

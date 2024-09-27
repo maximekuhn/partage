@@ -35,7 +35,8 @@ func main() {
 }
 
 type configFile struct {
-	DBFilepath string `yaml:"DBFilepath"`
+	DBFilepath      string `yaml:"DBFilepath"`
+	JWTSignatureKey string `yaml:"JWTSignatureKey"`
 }
 
 func parseConfigFile(path string) (*web.ServerConfig, error) {
@@ -52,6 +53,7 @@ func parseConfigFile(path string) (*web.ServerConfig, error) {
 	}
 
 	return &web.ServerConfig{
-		DBFilepath: cf.DBFilepath,
+		DBFilepath:      cf.DBFilepath,
+		JWTSignatureKey: []byte(cf.JWTSignatureKey),
 	}, nil
 }

@@ -7,12 +7,13 @@ import (
 )
 
 type AuthService struct {
-	hasher *BcryptPasswordHasher
-	store  AuthStore
+	hasher    *BcryptPasswordHasher
+	store     AuthStore
+	jwthelper *JWTHelper
 }
 
-func NewAuthService(hasher *BcryptPasswordHasher, store AuthStore) *AuthService {
-	return &AuthService{hasher, store}
+func NewAuthService(hasher *BcryptPasswordHasher, store AuthStore, jwthelper *JWTHelper) *AuthService {
+	return &AuthService{hasher, store, jwthelper}
 }
 
 func (s *AuthService) Hash(p Password) (HashedPassword, error) {
@@ -47,4 +48,8 @@ func (s *AuthService) Authenticate(ctx context.Context, userID valueobject.UserI
 		return false
 	}
 	return s.hasher.verify(p, data.HashedPassword)
+}
+
+func (s *AuthService) GenerateJWT(userID valueobject.UserID) (string, error) {
+	return s.jwthelper.NewSignedToken(userID)
 }
