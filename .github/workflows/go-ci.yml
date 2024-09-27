@@ -55,4 +55,6 @@ jobs:
         # https://taskfile.dev/installation/#install-script
         run: sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d -b /usr/local/bin
 
-      - run: [ $(task fmtcheck | wc -l) -eq 0 ] && exit 0 || exit 1
+      - name: check go code format
+        shell: bash
+        run: [ $(task fmtcheck | wc -l) -eq 0 ] && exit 0 || exit 1
