@@ -41,3 +41,20 @@ jobs:
         run: sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d -b /usr/local/bin
 
       - run: task test
+
+  fmtcheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      - name: install go-task
+        # https://taskfile.dev/installation/#install-script
+        run: sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d -b /usr/local/bin
+
+      - run: |
+        [ $(task fmtcheck | wc -l) -eq 0 ] && exit 0 || exit 1
+
