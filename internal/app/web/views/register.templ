@@ -1,8 +1,17 @@
 package views
 
-templ Register() {
-	<div>
-		@RegisterForm()
+templ Register(errMsg string) {
+	<div class="flex h-screen items-center justify-center">
+		<div>
+			<h1 class="text-center text-4xl font-bold mb-6">Register</h1>
+			if errMsg != "" {
+				<div class="max-w-xs border-l-4 border-red-500 bg-red-100 p-4 text-red-700" role="alert">
+					<p class="font-bold">Error</p>
+					<p>{ errMsg }</p>
+				</div>
+			}
+			@RegisterForm()
+		</div>
 	</div>
 }
 

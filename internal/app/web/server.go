@@ -64,7 +64,7 @@ func (s *Server) Run() error {
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("./internal/app/web/static"))))
 
 	http.Handle("/", templ.Handler(views.Page("Home", views.Index())))
-	http.Handle("GET /register", templ.Handler(views.Page("Register", views.Register())))
+	http.Handle("GET /register", templ.Handler(views.Page("Register", views.Register(""))))
 	http.HandleFunc("POST /register", s.handleRegisterUser)
 	http.Handle("GET /login", templ.Handler(views.Page("Login", views.Login())))
 	http.HandleFunc("POST /login", s.handleLoginUser)

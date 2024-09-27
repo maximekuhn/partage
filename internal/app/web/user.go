@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/maximekuhn/partage/internal/app/web/views"
 	"github.com/maximekuhn/partage/internal/auth"
 	"github.com/maximekuhn/partage/internal/core/command"
 	"github.com/maximekuhn/partage/internal/core/query"
@@ -17,31 +18,44 @@ func (s *Server) handleRegisterUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	w.Header().Add("Content-Type", "text/html")
+	ctx := r.Context()
+
 	if err := r.ParseForm(); err != nil {
+		views.Page("Register", views.Register("Some informations are missing !")).Render(ctx, w)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	email, err := valueobject.NewEmail(r.FormValue("email"))
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		views.Register("Please enter a valid email").Render(ctx, w)
 		return
 	}
 
 	nickname, err := valueobject.NewNickname(r.FormValue("nickname"))
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		views.Page("Register", views.Register("Please enter a valid nickname")).Render(ctx, w)
 		return
 	}
 
 	password, err := auth.NewPassword(r.FormValue("password"))
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		views.Page("Register", views.Register("Password is not strong enough")).Render(ctx, w)
+		return
+	}
+	passwordConfirm, err := auth.NewPassword(r.FormValue("password_confirm"))
+	if err != nil {
+		views.Page("Register", views.Register("Password is not strong enough")).Render(ctx, w)
+		return
+	}
+	if password != passwordConfirm {
+		views.Page("Register", views.Register("Password and confirmation don't match")).Render(ctx, w)
 		return
 	}
 	hashedPassword, err := s.authSvc.Hash(password)
 	if err != nil {
-		http.Error(w, "", http.StatusInternalServerError)
+		views.Page("Register", views.Register("Something went wrong :( Please try again")).Render(ctx, w)
 		return
 	}
 
@@ -50,13 +64,9 @@ func (s *Server) handleRegisterUser(w http.ResponseWriter, r *http.Request) {
 		Nickname: nickname,
 	}
 
-	ctx := r.Context()
-
-	// TODO: remove internal errors to not expose details to users
-
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		views.Page("Register", views.Register("Something went wrong :( Please try again")).Render(ctx, w)
 		return
 	}
 
@@ -64,23 +74,23 @@ func (s *Server) handleRegisterUser(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		_ = tx.Rollback()
 		// TODO: error can be user's fault
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		views.Page("Register", views.Register("Something went wrong :( Please try again")).Render(ctx, w)
 		return
 	}
 
 	if err := s.authSvc.Save(ctx, userID, hashedPassword); err != nil {
 		_ = tx.Rollback()
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		// XXX: can it be user's fault here too?
+		views.Page("Register", views.Register("Something went wrong :( Please try again")).Render(ctx, w)
 		return
 	}
 
 	if err = tx.Commit(); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		views.Page("Register", views.Register("Something went wrong :( Please try again")).Render(ctx, w)
 		return
 	}
 
-	// TODO: should return a page or a redirect
-	w.WriteHeader(http.StatusCreated)
+	http.Redirect(w, r, "/login", http.StatusSeeOther)
 }
 
 func (s *Server) handleLoginUser(w http.ResponseWriter, r *http.Request) {
