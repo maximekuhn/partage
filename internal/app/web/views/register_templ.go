@@ -29,7 +29,44 @@ func Register() templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<form action=\"/register\" method=\"POST\"><div class=\"w-fit bg-red-300 p-4 text-center text-xl\">Create a new account</div><div><label for=\"nickname\">Nickname:</label> <input type=\"text\" id=\"nickname\" name=\"nickname\" required></div><div><label for=\"email\">Email:</label> <input type=\"email\" id=\"email\" name=\"email\" required></div><div><label for=\"password\">Password:</label> <input type=\"password\" id=\"password\" name=\"password\" required></div><div><button type=\"submit\">Register</button></div></form>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = RegisterForm().Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		return templ_7745c5c3_Err
+	})
+}
+
+func RegisterForm() templ.Component {
+	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
+			return templ_7745c5c3_CtxErr
+		}
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+		if !templ_7745c5c3_IsBuffer {
+			defer func() {
+				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err == nil {
+					templ_7745c5c3_Err = templ_7745c5c3_BufErr
+				}
+			}()
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var2 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var2 == nil {
+			templ_7745c5c3_Var2 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"w-full max-w-xs\"><form action=\"/register\" method=\"POST\" class=\"mb-4 rounded bg-white px-8 pb-8 pt-6 shadow-md\"><div class=\"mb-4\"><label for=\"nickname\" class=\"mb-2 block text-sm font-bold text-gray-700\">Nickname</label> <input type=\"text\" id=\"nickname\" name=\"nickname\" class=\"focus:shadow-outline w-full appearance-none rounded border px-3 py-2 leading-tight text-gray-700 shadow focus:outline-none\" placeholder=\"Nickname\" required></div><div class=\"mb-4\"><label for=\"email\" class=\"mb-2 block text-sm font-bold text-gray-700\">Email</label> <input type=\"email\" id=\"email\" name=\"email\" class=\"focus:shadow-outline w-full appearance-none rounded border px-3 py-2 leading-tight text-gray-700 shadow focus:outline-none\" placeholder=\"Email\" required></div><div class=\"mb-4\"><label for=\"password\" class=\"mb-2 block text-sm font-bold text-gray-700\">Password</label> <input type=\"password\" id=\"password\" name=\"password\" class=\"focus:shadow-outline w-full appearance-none rounded border px-3 py-2 leading-tight text-gray-700 shadow focus:outline-none\" placeholder=\"********\" required></div><div class=\"mb-4\"><label for=\"confirm_password\" class=\"mb-2 block text-sm font-bold text-gray-700\">Confirm password</label> <input type=\"password\" id=\"confirm_password\" name=\"confirm_password\" class=\"focus:shadow-outline w-full appearance-none rounded border px-3 py-2 leading-tight text-gray-700 shadow focus:outline-none\" placeholder=\"********\" required></div><div class=\"flex items-center justify-between\"><button type=\"submit\" class=\"focus:shadow-outline rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700 focus:outline-none\">Register</button> <a href=\"/login\" class=\"inline-block align-baseline text-sm font-bold text-blue-500 hover:text-blue-800\">Sign in</a></div></form></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
