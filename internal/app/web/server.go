@@ -5,9 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/a-h/templ"
 	_ "github.com/mattn/go-sqlite3"
-	"github.com/maximekuhn/partage/internal/app/web/views"
 	"github.com/maximekuhn/partage/internal/auth"
 	"github.com/maximekuhn/partage/internal/core/command"
 	"github.com/maximekuhn/partage/internal/core/query"
@@ -63,10 +61,10 @@ func (s *Server) Run() error {
 	// serve static files
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("./internal/app/web/static"))))
 
-	http.Handle("/", templ.Handler(views.Page("Home", views.Index())))
-	http.Handle("GET /register", templ.Handler(views.Page("Register", views.Register(""))))
+	http.HandleFunc("/", s.handleIndex)
+	http.HandleFunc("GET /register", s.handleRegister)
 	http.HandleFunc("POST /register", s.handleRegisterUser)
-	http.Handle("GET /login", templ.Handler(views.Page("Login", views.Login(""))))
+	http.HandleFunc("GET /login", s.handleLogin)
 	http.HandleFunc("POST /login", s.handleLoginUser)
 
 	fmt.Println("server is up and running")

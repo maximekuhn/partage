@@ -3,6 +3,7 @@ package web
 import (
 	"fmt"
 	"net/http"
+	"net/url"
 
 	"github.com/maximekuhn/partage/internal/app/web/views"
 	"github.com/maximekuhn/partage/internal/auth"
@@ -90,7 +91,9 @@ func (s *Server) handleRegisterUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	http.Redirect(w, r, "/login", http.StatusSeeOther)
+	msg := url.QueryEscape("Account created successfully !")
+	redirectUrl := fmt.Sprintf("/login?msg=%s", msg)
+	http.Redirect(w, r, redirectUrl, http.StatusSeeOther)
 }
 
 func (s *Server) handleLoginUser(w http.ResponseWriter, r *http.Request) {
@@ -110,13 +113,13 @@ func (s *Server) handleLoginUser(w http.ResponseWriter, r *http.Request) {
 
 	email, err := valueobject.NewEmail(r.FormValue("email"))
 	if err != nil {
-		views.Page("Login", views.Login("Please enter a valid email")).Render(ctx, w)
+		views.Page("Login", views.Login("Please enter a valid email", "")).Render(ctx, w)
 		return
 	}
 
 	password, err := auth.NewPassword(r.FormValue("password"))
 	if err != nil {
-		views.Page("Login", views.Login("Invalid password (not strong enough)")).Render(ctx, w)
+		views.Page("Login", views.Login("Invalid password (not strong enough)", "")).Render(ctx, w)
 		return
 	}
 
@@ -124,24 +127,24 @@ func (s *Server) handleLoginUser(w http.ResponseWriter, r *http.Request) {
 		Email: email,
 	})
 	if err != nil {
-		views.Page("Login", views.Login("Something went wrong :( Please try again later.")).Render(ctx, w)
+		views.Page("Login", views.Login("Something went wrong :( Please try again later.", "")).Render(ctx, w)
 		return
 	}
 	if !found {
-		views.Page("Login", views.Login("Invalid credentials or account not found")).Render(ctx, w)
+		views.Page("Login", views.Login("Invalid credentials or account not found", "")).Render(ctx, w)
 		return
 	}
 
 	authenticated := s.authSvc.Authenticate(ctx, u.ID, password)
 
 	if !authenticated {
-		views.Page("Login", views.Login("Invalid credentials or account not found")).Render(ctx, w)
+		views.Page("Login", views.Login("Invalid credentials or account not found", "")).Render(ctx, w)
 		return
 	}
 
 	_, err = s.authSvc.GenerateJWT(u.ID)
 	if err != nil {
-		views.Page("Login", views.Login("Something went wrong :( Please try again later.")).Render(ctx, w)
+		views.Page("Login", views.Login("Something went wrong :( Please try again later.", "")).Render(ctx, w)
 		return
 	}
 
