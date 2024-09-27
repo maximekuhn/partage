@@ -66,7 +66,7 @@ func (s *Server) Run() error {
 	http.Handle("/", templ.Handler(views.Page("Home", views.Index())))
 	http.Handle("GET /register", templ.Handler(views.Page("Register", views.Register(""))))
 	http.HandleFunc("POST /register", s.handleRegisterUser)
-	http.Handle("GET /login", templ.Handler(views.Page("Login", views.Login())))
+	http.Handle("GET /login", templ.Handler(views.Page("Login", views.Login(""))))
 	http.HandleFunc("POST /login", s.handleLoginUser)
 
 	fmt.Println("server is up and running")
