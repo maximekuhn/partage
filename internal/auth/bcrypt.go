@@ -1,8 +1,6 @@
 package auth
 
 import (
-	"bytes"
-
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -23,12 +21,5 @@ func (b *BcryptPasswordHasher) hash(p Password) (HashedPassword, error) {
 
 // verify if the password is the same as the hash
 func (b *BcryptPasswordHasher) verify(p Password, h HashedPassword) bool {
-	hash, err := bcrypt.GenerateFromPassword([]byte(p.password), bcrypt.DefaultCost)
-	if err != nil {
-		return false
-	}
-	if bytes.Equal(hash, h.hash) {
-		return false
-	}
-	return true
+	return bcrypt.CompareHashAndPassword(h.hash, []byte(p.password)) == nil
 }
