@@ -13,4 +13,5 @@ type AuthData struct {
 
 type AuthStore interface {
 	Save(ctx context.Context, data AuthData) error
+	GetByUserID(ctx context.Context, userID valueobject.UserID) (*AuthData, bool, error)
 }

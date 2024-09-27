@@ -10,14 +10,16 @@ import (
 	"github.com/maximekuhn/partage/internal/app/web/views"
 	"github.com/maximekuhn/partage/internal/auth"
 	"github.com/maximekuhn/partage/internal/core/command"
+	"github.com/maximekuhn/partage/internal/core/query"
 	"github.com/maximekuhn/partage/internal/infra/misc"
 	"github.com/maximekuhn/partage/internal/infra/store/sqlite"
 )
 
 type Server struct {
-	db                *sql.DB
-	authSvc           *auth.AuthService
-	createUserHandler command.CreateUserHandler
+	db                    *sql.DB
+	authSvc               *auth.AuthService
+	createUserHandler     *command.CreateUserHandler
+	getUserByEmailHandler *query.GetUserByEmailCommandHandler
 }
 
 func NewServer(config ServerConfig) (*Server, error) {
@@ -38,13 +40,17 @@ func NewServer(config ServerConfig) (*Server, error) {
 		sqlite.NewSQLiteAuthStore(db),
 	)
 
+	userstore := sqlite.NewSQLiteUserStore(db)
+
 	createUserHandler := command.NewCreateUserHandler(
 		&misc.UserIDProviderProd{},
 		&misc.DatetimeProviderProd{},
-		sqlite.NewSQLiteUserStore(db),
+		userstore,
 	)
 
-	return &Server{db, authSvc, *createUserHandler}, nil
+	getUserByEmailHandler := query.NewGetUserByEmailCommandHandler(userstore)
+
+	return &Server{db, authSvc, createUserHandler, getUserByEmailHandler}, nil
 }
 
 func (s *Server) Run() error {
@@ -53,6 +59,8 @@ func (s *Server) Run() error {
 
 	http.Handle("GET /register", templ.Handler(views.Page("Register", views.Register())))
 	http.HandleFunc("POST /register", s.handleRegisterUser)
+	http.Handle("GET /login", templ.Handler(views.Page("Login", views.Login())))
+	http.HandleFunc("POST /login", s.handleLoginUser)
 
 	fmt.Println("server is up and running")
 

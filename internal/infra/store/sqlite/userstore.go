@@ -76,3 +76,34 @@ func (s *SQLiteUserStore) GetByID(ctx context.Context, id valueobject.UserID) (*
 
 	return u, true, nil
 }
+
+func (s *SQLiteUserStore) GetByEmail(ctx context.Context, email valueobject.Email) (*entity.User, bool, error) {
+	query := `
+    SELECT id, nickname, created_at FROM user WHERE email = ?
+    `
+	var su sqliteUser
+	err := s.db.QueryRowContext(ctx, query, email.String()).Scan(&su.id, &su.nickname, &su.createdAt)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, false, nil
+		}
+		return nil, false, err
+	}
+
+	idUUID, err := uuid.Parse(su.id)
+	if err != nil {
+		return nil, false, err
+	}
+	id, err := valueobject.NewUserID(idUUID)
+	if err != nil {
+		return nil, false, err
+	}
+	nn, err := valueobject.NewNickname(su.nickname)
+	if err != nil {
+		return nil, false, err
+	}
+
+	u := entity.NewUser(id, email, nn, su.createdAt)
+
+	return u, true, nil
+}

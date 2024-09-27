@@ -34,3 +34,17 @@ func (s *AuthService) Save(
 	}
 	return s.store.Save(ctx, data)
 }
+
+// Authenticate checks if the provided password matches the hashed password
+// for the given userID.
+// It returns true if the user has been authenticated correctly, false otherwise.
+func (s *AuthService) Authenticate(ctx context.Context, userID valueobject.UserID, p Password) bool {
+	data, found, err := s.store.GetByUserID(ctx, userID)
+	if err != nil {
+		return false
+	}
+	if !found {
+		return false
+	}
+	return s.hasher.verify(p, data.HashedPassword)
+}

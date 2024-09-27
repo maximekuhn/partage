@@ -1,13 +1,9 @@
 package views
 
-templ Register() {
-	<form action="/register" method="POST">
+templ Login() {
+	<form action="/login" method="POST">
 		<div class="w-fit bg-red-300 p-4 text-center text-xl">
-			Create a new account
-		</div>
-		<div>
-			<label for="nickname">Nickname:</label>
-			<input type="text" id="nickname" name="nickname" required/>
+			Login to your account
 		</div>
 		<div>
 			<label for="email">Email:</label>
@@ -18,7 +14,7 @@ templ Register() {
 			<input type="password" id="password" name="password" required/>
 		</div>
 		<div>
-			<button type="submit">Register</button>
+			<button type="submit">Login</button>
 		</div>
 	</form>
 }
