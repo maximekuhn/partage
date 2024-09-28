@@ -1,0 +1,33 @@
+package views
+
+import "github.com/maximekuhn/partage/internal/core/entity"
+
+templ Groups(user *entity.User, errMsg string) {
+	<div class="flex h-screen items-center justify-center">
+		<div>
+			<h1 class="text-center text-4xl font-bold mb-6">Create a new group</h1>
+			if errMsg != "" {
+				<div class="max-w-xs border-l-4 border-red-500 bg-red-100 p-4 text-red-700" role="alert">
+					<p class="font-bold">Error</p>
+					<p>{ errMsg }</p>
+				</div>
+			}
+			@createGroupForm()
+		</div>
+	</div>
+}
+
+templ createGroupForm() {
+	// https://v1.tailwindcss.com/components/forms
+	<div class="w-full max-w-xs">
+		<form action="/group/create" method="POST" class="mb-4 rounded bg-white px-8 pb-8 pt-6 shadow-md">
+			<div class="mb-4">
+				<label for="group_name" class="mb-2 block text-sm font-bold text-gray-700">Group name</label>
+				<input type="text" id="group_name" name="group_name" class="focus:shadow-outline w-full appearance-none rounded border px-3 py-2 leading-tight text-gray-700 shadow focus:outline-none" placeholder="My awesome group" required/>
+			</div>
+			<div class="items-center">
+				<button type="submit" class="focus:shadow-outline rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700 focus:outline-none">Create group</button>
+			</div>
+		</form>
+	</div>
+}

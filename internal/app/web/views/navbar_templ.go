@@ -46,6 +46,21 @@ func Navbar(currentPage string, user *entity.User) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div><div class=\"h-full max-w-16 w-16 hover:bg-blue-700 py-2\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		if currentPage == "Groups" {
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<a href=\"/group\" class=\"underline underline-offset-8\">Groups</a>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		} else {
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<a href=\"/group\">Groups</a>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div><div class=\"flex h-full py-2 ml-auto\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
@@ -58,7 +73,7 @@ func Navbar(currentPage string, user *entity.User) templ.Component {
 			var templ_7745c5c3_Var2 string
 			templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(user.Nickname.String())
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/app/web/views/navbar.templ`, Line: 16, Col: 44}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/app/web/views/navbar.templ`, Line: 23, Col: 44}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 			if templ_7745c5c3_Err != nil {

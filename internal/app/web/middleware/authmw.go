@@ -30,7 +30,7 @@ func NewAuthMw(authSvc *auth.AuthService, getUserByIDHandler *query.GetUserByIDQ
 	return &AuthMw{authSvc, getUserByIDHandler}
 }
 
-func (a *AuthMw) AuthMiddleware(next http.Handler) http.Handler {
+func (a *AuthMw) AuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("Hello from auth middleware")
 

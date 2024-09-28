@@ -32,7 +32,8 @@ func (s *Server) handleLogin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	msg := r.URL.Query().Get("msg")
-	err := views.Page("Login", user, views.Login("", msg)).Render(r.Context(), w)
+	errMsg := r.URL.Query().Get("err_msg")
+	err := views.Page("Login", user, views.Login(errMsg, msg)).Render(r.Context(), w)
 	if err != nil {
 		http.Error(w, "", http.StatusInternalServerError)
 		return
@@ -46,9 +47,25 @@ func (s *Server) handleRegister(w http.ResponseWriter, r *http.Request) {
 	if ok && authmwdata.Authenticated {
 		user = authmwdata.User
 	}
-	err := views.Page("Login", user, views.Register("")).Render(r.Context(), w)
+	err := views.Page("Register", user, views.Register("")).Render(r.Context(), w)
 	if err != nil {
 		http.Error(w, "", http.StatusInternalServerError)
 		return
 	}
+}
+
+func (s *Server) handleGroups(w http.ResponseWriter, r *http.Request) {
+	authmwdata, ok := r.Context().Value(middleware.AuthDatacontextKey).(middleware.AuthMwData)
+
+	var user *entity.User
+	if ok && authmwdata.Authenticated {
+		user = authmwdata.User
+	}
+
+	err := views.Page("Groups", user, views.Groups(user, "")).Render(r.Context(), w)
+	if err != nil {
+		http.Error(w, "", http.StatusInternalServerError)
+		return
+	}
+
 }

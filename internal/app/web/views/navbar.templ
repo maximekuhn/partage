@@ -11,6 +11,13 @@ templ Navbar(currentPage string, user *entity.User) {
 				<a href="/">Home</a>
 			}
 		</div>
+		<div class="h-full max-w-16 w-16 hover:bg-blue-700 py-2">
+			if currentPage == "Groups" {
+				<a href="/group" class="underline underline-offset-8">Groups</a>
+			} else {
+				<a href="/group">Groups</a>
+			}
+		</div>
 		<div class="flex h-full py-2 ml-auto">
 			if user != nil {
 				<p>logged in as { user.Nickname.String() }</p>

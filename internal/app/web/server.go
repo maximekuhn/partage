@@ -20,6 +20,7 @@ type Server struct {
 	createUserHandler     *command.CreateUserHandler
 	getUserByEmailHandler *query.GetUserByEmailQueryHandler
 	getUserByIDHandler    *query.GetUserByIDQueryHandler
+	createGroupHandler    *command.CreateGroupCmdHandler
 }
 
 func NewServer(config ServerConfig) (*Server, error) {
@@ -57,7 +58,22 @@ func NewServer(config ServerConfig) (*Server, error) {
 	getUserByEmailHandler := query.NewGetUserByEmailCommandHandler(userstore)
 	getUserByIDHandler := query.NewGetUserByIDCommandHandler(userstore)
 
-	return &Server{db, authSvc, createUserHandler, getUserByEmailHandler, getUserByIDHandler}, nil
+	groupstore := sqlite.NewSQLiteGroupStore(db)
+
+	createGroupHandler := command.NewCreateGroupCmdHandler(
+		&misc.GroupIDProviderProd{},
+		&misc.DatetimeProviderProd{},
+		groupstore,
+	)
+
+	return &Server{
+		db,
+		authSvc,
+		createUserHandler,
+		getUserByEmailHandler,
+		getUserByIDHandler,
+		createGroupHandler,
+	}, nil
 }
 
 func (s *Server) Run() error {
@@ -65,14 +81,17 @@ func (s *Server) Run() error {
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("./internal/app/web/static"))))
 
 	authMw := middleware.NewAuthMw(s.authSvc, s.getUserByIDHandler)
+	authenticatedMw := middleware.NewAuthenticatedMw()
 
-	http.Handle("/", authMw.AuthMiddleware(http.HandlerFunc(s.handleIndex)))
+	http.Handle("/", authMw.AuthMiddleware(s.handleIndex))
 	http.Handle("/favicon.ico", http.NotFoundHandler())
 	http.HandleFunc("GET /register", s.handleRegister)
 	http.HandleFunc("POST /register", s.handleRegisterUser)
 	http.HandleFunc("GET /login", s.handleLogin)
 	http.HandleFunc("POST /login", s.handleLoginUser)
-	http.Handle("POST /logout", authMw.AuthMiddleware(http.HandlerFunc(s.handleLogoutUser)))
+	http.Handle("POST /logout", authMw.AuthMiddleware(s.handleLogoutUser))
+	http.Handle("GET /group", authMw.AuthMiddleware(authenticatedMw.AuthenticatedMiddleware(s.handleGroups)))
+	http.Handle("POST /group/create", authMw.AuthMiddleware(authenticatedMw.AuthenticatedMiddleware(s.handleCreateGroup)))
 
 	fmt.Println("server is up and running")
 

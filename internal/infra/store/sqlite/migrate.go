@@ -20,6 +20,14 @@ func ApplyMigrations(db *sql.DB) error {
 		return err
 	}
 
+	if err := createGroupTable(ctx, db); err != nil {
+		return err
+	}
+
+	if err := createGroupUserAssociationTable(ctx, db); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -42,6 +50,33 @@ func createAuthTable(ctx context.Context, db *sql.DB) error {
     CREATE TABLE IF NOT EXISTS auth (
         user_id TEXT PRIMARY KEY,
         hashed_password BLOB NOT NULL
+    )
+    `
+	_, err := db.ExecContext(ctx, query)
+	return err
+}
+
+func createGroupTable(ctx context.Context, db *sql.DB) error {
+	// NOTE: we are using 'partage_group' as table name because
+	// 'group' is a reserved SQL keyword
+	query := `
+    CREATE TABLE IF NOT EXISTS partage_group (
+        id TEXT PRIMARY KEY,
+        name TEXT NOT NULL,
+        owner TEXT NOT NULL,
+        created_at DATE NOT NULL,
+        UNIQUE(id, name)
+    )
+    `
+	_, err := db.ExecContext(ctx, query)
+	return err
+}
+
+func createGroupUserAssociationTable(ctx context.Context, db *sql.DB) error {
+	query := `
+    CREATE TABLE IF NOT EXISTS partage_group_user (
+        group_id TEXT PRIMARY KEY,
+        user_id TEXT NOT NULL
     )
     `
 	_, err := db.ExecContext(ctx, query)
