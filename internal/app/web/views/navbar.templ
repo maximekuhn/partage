@@ -1,0 +1,26 @@
+package views
+
+import "github.com/maximekuhn/partage/internal/core/entity"
+
+templ Navbar(currentPage string, user *entity.User) {
+	<nav class="flex justify-stretch bg-blue-500 border-b border-black px-3 mb-4 text-white font-bold text-lg text-center">
+		<div class="h-full max-w-16 w-16 hover:bg-blue-700 py-2">
+			if currentPage == "Home" {
+				<a href="/" class="underline underline-offset-8">Home</a>
+			} else {
+				<a href="/">Home</a>
+			}
+		</div>
+		<div class="h-full py-2 ml-auto">
+			if user != nil {
+				<p>logged in as { user.Nickname.String() }</p>
+			} else {
+				<p>
+					<a href="/login" class="hover:underline">Sign in</a>
+					/
+					<a href="/register" class="hover:underline">Sign up</a>
+				</p>
+			}
+		</div>
+	</nav>
+}

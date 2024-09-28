@@ -9,6 +9,7 @@ templ Page(title string, body templ.Component) {
 			<title>{ title }</title>
 		</head>
 		<body>
+			@Navbar(title, nil)
 			@body
 		</body>
 	</html>

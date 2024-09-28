@@ -7,7 +7,7 @@ import (
 )
 
 func (s *Server) handleIndex(w http.ResponseWriter, r *http.Request) {
-	err := views.Page("Home", views.Index()).Render(r.Context(), w)
+	err := views.Page("Home", views.Index(nil)).Render(r.Context(), w)
 	if err != nil {
 		http.Error(w, "", http.StatusInternalServerError)
 		return
