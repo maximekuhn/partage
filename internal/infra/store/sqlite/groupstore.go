@@ -46,16 +46,53 @@ func (s *SQLiteGroupStore) FindByName(ctx context.Context, name valueobject.Grou
 		return nil, false, err
 	}
 
-	g := entity.NewGroup(groupID, name, make([]valueobject.UserID, 0), ownerID, created_at)
+	membersQuery := `
+    SELECT user_id FROM partage_group_user WHERE group_id = ?
+    `
+	rows, err := s.db.QueryContext(ctx, membersQuery, groupID.String())
+	defer func() { _ = rows.Close() }()
+
+	if err != nil {
+		return nil, false, err
+	}
+
+	members := make([]valueobject.UserID, 0)
+	for rows.Next() {
+		var userID uuid.UUID
+		if err := rows.Scan(&userID); err != nil {
+			return nil, false, err
+		}
+
+		memberID, err := valueobject.NewUserID(userID)
+		if err != nil {
+			return nil, false, err
+		}
+
+		members = append(members, memberID)
+	}
+
+	g := entity.NewGroup(groupID, name, members, ownerID, created_at)
 	return g, true, nil
 }
 
 func (s *SQLiteGroupStore) Save(ctx context.Context, g *entity.Group) error {
-	// TODO: handle members
 	query := `
     INSERT INTO partage_group (id, name, owner, created_at) VALUES (?, ?, ?, ?)
     `
 	_, err := s.db.ExecContext(ctx, query, g.ID.String(), g.Name.String(), g.Owner.String(), g.CreatedAt)
 
+	if err != nil {
+		return err
+	}
+
+	memberQuery := `
+    INSERT INTO partage_group_user (group_id, user_id) VALUES (?, ?)
+    `
+	for _, memberID := range g.Members {
+		_, err := s.db.ExecContext(ctx, memberQuery, g.ID.String(), memberID.String())
+		if err != nil {
+			return err
+		}
+	}
 	return err
 }
