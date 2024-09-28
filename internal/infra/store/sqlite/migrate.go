@@ -49,7 +49,8 @@ func createAuthTable(ctx context.Context, db *sql.DB) error {
 	query := `
     CREATE TABLE IF NOT EXISTS auth (
         user_id TEXT PRIMARY KEY,
-        hashed_password BLOB NOT NULL
+        hashed_password BLOB NOT NULL,
+        FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE
     )
     `
 	_, err := db.ExecContext(ctx, query)
@@ -65,7 +66,8 @@ func createGroupTable(ctx context.Context, db *sql.DB) error {
         name TEXT NOT NULL,
         owner TEXT NOT NULL,
         created_at DATE NOT NULL,
-        UNIQUE(id, name)
+        UNIQUE(id, name),
+        FOREIGN KEY (owner) REFERENCES user(id) ON DELETE CASCADE
     )
     `
 	_, err := db.ExecContext(ctx, query)
@@ -75,8 +77,11 @@ func createGroupTable(ctx context.Context, db *sql.DB) error {
 func createGroupUserAssociationTable(ctx context.Context, db *sql.DB) error {
 	query := `
     CREATE TABLE IF NOT EXISTS partage_group_user (
-        group_id TEXT PRIMARY KEY,
-        user_id TEXT NOT NULL
+        group_id TEXT,
+        user_id TEXT,
+        PRIMARY KEY (group_id, user_id),
+        FOREIGN KEY (group_id) REFERENCES partage_group(id) ON DELETE CASCADE,
+        FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE
     )
     `
 	_, err := db.ExecContext(ctx, query)
