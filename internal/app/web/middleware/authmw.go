@@ -51,6 +51,7 @@ func (a *AuthMw) AuthMiddleware(next http.Handler) http.Handler {
 
 		userID, err := a.authSvc.VerifyToken(tokenStr)
 		if err != nil {
+			fmt.Println("could not verify token")
 			authData.Authenticated = false
 			ctx := context.WithValue(r.Context(), AuthDatacontextKey, authData)
 			r = r.WithContext(ctx)
@@ -62,6 +63,7 @@ func (a *AuthMw) AuthMiddleware(next http.Handler) http.Handler {
 			ID: *userID,
 		})
 		if err != nil || !found {
+			fmt.Println("could not get user or user not found")
 			authData.Authenticated = false
 			ctx := context.WithValue(r.Context(), AuthDatacontextKey, authData)
 			r = r.WithContext(ctx)
