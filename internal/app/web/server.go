@@ -18,8 +18,8 @@ type Server struct {
 	db                    *sql.DB
 	authSvc               *auth.AuthService
 	createUserHandler     *command.CreateUserHandler
-	getUserByEmailHandler *query.GetUserByEmailCommandHandler
-	getUserByIDHandler    *query.GetUserByIDCommandHandler
+	getUserByEmailHandler *query.GetUserByEmailQueryHandler
+	getUserByIDHandler    *query.GetUserByIDQueryHandler
 }
 
 func NewServer(config ServerConfig) (*Server, error) {

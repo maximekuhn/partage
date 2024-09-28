@@ -63,7 +63,7 @@ func (s *Server) handleRegisterUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	cmd := command.CreateUser{
+	cmd := command.CreateUserCmd{
 		Email:    email,
 		Nickname: nickname,
 	}
@@ -126,7 +126,7 @@ func (s *Server) handleLoginUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	u, found, err := s.getUserByEmailHandler.Handle(ctx, query.GetUserByEmailCommand{
+	u, found, err := s.getUserByEmailHandler.Handle(ctx, query.GetUserByEmailQuery{
 		Email: email,
 	})
 	if err != nil {

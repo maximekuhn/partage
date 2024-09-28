@@ -8,18 +8,18 @@ import (
 	"github.com/maximekuhn/partage/internal/core/valueobject"
 )
 
-type GetUserByEmailCommand struct {
+type GetUserByEmailQuery struct {
 	Email valueobject.Email
 }
 
-type GetUserByEmailCommandHandler struct {
+type GetUserByEmailQueryHandler struct {
 	s store.UserStore
 }
 
-func NewGetUserByEmailCommandHandler(s store.UserStore) *GetUserByEmailCommandHandler {
-	return &GetUserByEmailCommandHandler{s}
+func NewGetUserByEmailCommandHandler(s store.UserStore) *GetUserByEmailQueryHandler {
+	return &GetUserByEmailQueryHandler{s}
 }
 
-func (h *GetUserByEmailCommandHandler) Handle(ctx context.Context, cmd GetUserByEmailCommand) (*entity.User, bool, error) {
+func (h *GetUserByEmailQueryHandler) Handle(ctx context.Context, cmd GetUserByEmailQuery) (*entity.User, bool, error) {
 	return h.s.GetByEmail(ctx, cmd.Email)
 }

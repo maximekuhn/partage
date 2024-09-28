@@ -9,7 +9,7 @@ import (
 	"github.com/maximekuhn/partage/internal/core/valueobject"
 )
 
-type CreateUser struct {
+type CreateUserCmd struct {
 	Email    valueobject.Email
 	Nickname valueobject.Nickname
 }
@@ -30,7 +30,7 @@ func NewCreateUserHandler(
 
 // Handle creates a new user and return the id.
 // If a non-nil error is returned, id must be considered invalid.
-func (h *CreateUserHandler) Handle(ctx context.Context, cmd CreateUser) (valueobject.UserID, error) {
+func (h *CreateUserHandler) Handle(ctx context.Context, cmd CreateUserCmd) (valueobject.UserID, error) {
 	id := h.uidp.Provide()
 	ca := h.dtp.Provide()
 

@@ -23,10 +23,10 @@ const (
 // This middleware doesn't return any error if the user isn't authenticated.
 type AuthMw struct {
 	authSvc            *auth.AuthService
-	getUserByIDHandler *query.GetUserByIDCommandHandler
+	getUserByIDHandler *query.GetUserByIDQueryHandler
 }
 
-func NewAuthMw(authSvc *auth.AuthService, getUserByIDHandler *query.GetUserByIDCommandHandler) *AuthMw {
+func NewAuthMw(authSvc *auth.AuthService, getUserByIDHandler *query.GetUserByIDQueryHandler) *AuthMw {
 	return &AuthMw{authSvc, getUserByIDHandler}
 }
 
@@ -59,7 +59,7 @@ func (a *AuthMw) AuthMiddleware(next http.Handler) http.Handler {
 			return
 		}
 
-		user, found, err := a.getUserByIDHandler.Handle(r.Context(), query.GetUserByIDCommand{
+		user, found, err := a.getUserByIDHandler.Handle(r.Context(), query.GetUserByIDQuery{
 			ID: *userID,
 		})
 		if err != nil || !found {
