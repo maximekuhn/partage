@@ -6,9 +6,11 @@ import (
 	"net/url"
 	"time"
 
+	"github.com/maximekuhn/partage/internal/app/web/middleware"
 	"github.com/maximekuhn/partage/internal/app/web/views"
 	"github.com/maximekuhn/partage/internal/auth"
 	"github.com/maximekuhn/partage/internal/core/command"
+	"github.com/maximekuhn/partage/internal/core/entity"
 	"github.com/maximekuhn/partage/internal/core/query"
 	"github.com/maximekuhn/partage/internal/core/valueobject"
 )
@@ -159,4 +161,34 @@ func (s *Server) handleLoginUser(w http.ResponseWriter, r *http.Request) {
 	})
 
 	http.Redirect(w, r, "/", http.StatusSeeOther)
+}
+
+func (s *Server) handleLogoutUser(w http.ResponseWriter, r *http.Request) {
+	fmt.Printf("%s /logout\n", r.Method)
+	if r.Method != http.MethodPost {
+		http.Error(w, "", http.StatusMethodNotAllowed)
+		return
+	}
+
+	authmwdata, ok := r.Context().Value(middleware.AuthDatacontextKey).(middleware.AuthMwData)
+
+	var user *entity.User
+	if ok && authmwdata.Authenticated {
+		user = authmwdata.User
+	}
+
+	if user == nil {
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
+
+	// Remove JWT from cookies
+	http.SetCookie(w, &http.Cookie{
+		Name:     "authToken",
+		Value:    "",
+		Expires:  time.Now(),
+		HttpOnly: true,
+	})
+
+	http.Redirect(w, r, "/login", http.StatusSeeOther)
 }

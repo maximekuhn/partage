@@ -11,9 +11,13 @@ templ Navbar(currentPage string, user *entity.User) {
 				<a href="/">Home</a>
 			}
 		</div>
-		<div class="h-full py-2 ml-auto">
+		<div class="flex h-full py-2 ml-auto">
 			if user != nil {
 				<p>logged in as { user.Nickname.String() }</p>
+				&nbsp;
+				<form id="logout-form" action="/logout" method="POST">
+					(<button type="submit" class="hover:underline">logout</button>)
+				</form>
 			} else {
 				<p>
 					<a href="/login" class="hover:underline">Sign in</a>

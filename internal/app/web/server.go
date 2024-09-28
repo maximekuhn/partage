@@ -72,6 +72,7 @@ func (s *Server) Run() error {
 	http.HandleFunc("POST /register", s.handleRegisterUser)
 	http.HandleFunc("GET /login", s.handleLogin)
 	http.HandleFunc("POST /login", s.handleLoginUser)
+	http.Handle("POST /logout", authMw.AuthMiddleware(http.HandlerFunc(s.handleLogoutUser)))
 
 	fmt.Println("server is up and running")
 
