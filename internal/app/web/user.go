@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"time"
 
 	"github.com/maximekuhn/partage/internal/app/web/views"
 	"github.com/maximekuhn/partage/internal/auth"
@@ -142,11 +143,20 @@ func (s *Server) handleLoginUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err = s.authSvc.GenerateJWT(u.ID)
+	jwt, err := s.authSvc.GenerateJWT(u.ID)
 	if err != nil {
 		_ = views.Page("Login", views.Login("Something went wrong :( Please try again later.", "")).Render(ctx, w)
 		return
 	}
+
+	// Store JWT in cookies
+	// is it ok?
+	http.SetCookie(w, &http.Cookie{
+		Name:     "authToken",
+		Value:    jwt,
+		Expires:  time.Now().Add(24 * time.Hour),
+		HttpOnly: true,
+	})
 
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
