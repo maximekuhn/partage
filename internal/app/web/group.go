@@ -55,6 +55,7 @@ func (s *Server) handleCreateGroup(w http.ResponseWriter, r *http.Request) {
 		Owner: user.ID,
 	})
 	if err != nil {
+		_ = tx.Rollback()
 		fmt.Printf("failed to create group: %s\n", err)
 		_ = views.Page("Groups", user, views.Groups(user, "Oops! Something went wrong and your group could not be created :(")).Render(ctx, w)
 		return
