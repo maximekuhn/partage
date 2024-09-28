@@ -1,6 +1,8 @@
 package views
 
-templ Page(title string, body templ.Component) {
+import "github.com/maximekuhn/partage/internal/core/entity"
+
+templ Page(title string, user *entity.User, body templ.Component) {
 	<!DOCTYPE html>
 	<html>
 		<head>
@@ -9,7 +11,7 @@ templ Page(title string, body templ.Component) {
 			<title>{ title }</title>
 		</head>
 		<body>
-			@Navbar(title, nil)
+			@Navbar(title, user)
 			@body
 		</body>
 	</html>

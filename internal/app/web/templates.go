@@ -15,7 +15,7 @@ func (s *Server) handleIndex(w http.ResponseWriter, r *http.Request) {
 	if ok && authmwdata.Authenticated {
 		user = authmwdata.User
 	}
-	err := views.Page("Home", views.Index(user)).Render(r.Context(), w)
+	err := views.Page("Home", user, views.Index(user)).Render(r.Context(), w)
 	if err != nil {
 		http.Error(w, "", http.StatusInternalServerError)
 		return
@@ -24,7 +24,7 @@ func (s *Server) handleIndex(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) handleLogin(w http.ResponseWriter, r *http.Request) {
 	msg := r.URL.Query().Get("msg")
-	err := views.Page("Login", views.Login("", msg)).Render(r.Context(), w)
+	err := views.Page("Login", nil, views.Login("", msg)).Render(r.Context(), w)
 	if err != nil {
 		http.Error(w, "", http.StatusInternalServerError)
 		return
@@ -32,7 +32,7 @@ func (s *Server) handleLogin(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) handleRegister(w http.ResponseWriter, r *http.Request) {
-	err := views.Page("Login", views.Register("")).Render(r.Context(), w)
+	err := views.Page("Login", nil, views.Register("")).Render(r.Context(), w)
 	if err != nil {
 		http.Error(w, "", http.StatusInternalServerError)
 		return

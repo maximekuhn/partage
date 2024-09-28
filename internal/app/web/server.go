@@ -67,6 +67,7 @@ func (s *Server) Run() error {
 	authMw := middleware.NewAuthMw(s.authSvc, s.getUserByIDHandler)
 
 	http.Handle("/", authMw.AuthMiddleware(http.HandlerFunc(s.handleIndex)))
+	http.Handle("/favicon.ico", http.NotFoundHandler())
 	http.HandleFunc("GET /register", s.handleRegister)
 	http.HandleFunc("POST /register", s.handleRegisterUser)
 	http.HandleFunc("GET /login", s.handleLogin)

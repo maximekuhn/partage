@@ -32,6 +32,8 @@ func NewAuthMw(authSvc *auth.AuthService, getUserByIDHandler *query.GetUserByIDC
 
 func (a *AuthMw) AuthMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		fmt.Println("Hello from auth middleware")
+
 		var authData AuthMwData
 
 		cookie := r.Header.Get("Cookie")
@@ -72,7 +74,6 @@ func (a *AuthMw) AuthMiddleware(next http.Handler) http.Handler {
 
 		ctx := context.WithValue(r.Context(), AuthDatacontextKey, authData)
 		r = r.WithContext(ctx)
-		next.ServeHTTP(w, r)
 		next.ServeHTTP(w, r)
 	})
 }
