@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	_ "github.com/mattn/go-sqlite3"
+	"github.com/maximekuhn/partage/internal/app/web/middleware"
 	"github.com/maximekuhn/partage/internal/auth"
 	"github.com/maximekuhn/partage/internal/core/command"
 	"github.com/maximekuhn/partage/internal/core/query"
@@ -61,7 +62,9 @@ func (s *Server) Run() error {
 	// serve static files
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("./internal/app/web/static"))))
 
-	http.HandleFunc("/", s.handleIndex)
+	authMw := middleware.NewAuthMw(s.authSvc)
+
+	http.Handle("/", authMw.AuthMiddleware(http.HandlerFunc(s.handleIndex)))
 	http.HandleFunc("GET /register", s.handleRegister)
 	http.HandleFunc("POST /register", s.handleRegisterUser)
 	http.HandleFunc("GET /login", s.handleLogin)
