@@ -53,3 +53,7 @@ func (s *AuthService) Authenticate(ctx context.Context, userID valueobject.UserI
 func (s *AuthService) GenerateJWT(userID valueobject.UserID) (string, error) {
 	return s.jwthelper.NewSignedToken(userID)
 }
+
+func (s *AuthService) VerifyToken(tokenString string) (*valueobject.UserID, error) {
+	return s.jwthelper.VerifyToken(tokenString)
+}

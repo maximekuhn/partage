@@ -19,6 +19,7 @@ type Server struct {
 	authSvc               *auth.AuthService
 	createUserHandler     *command.CreateUserHandler
 	getUserByEmailHandler *query.GetUserByEmailCommandHandler
+	getUserByIDHandler    *query.GetUserByIDCommandHandler
 }
 
 func NewServer(config ServerConfig) (*Server, error) {
@@ -54,15 +55,16 @@ func NewServer(config ServerConfig) (*Server, error) {
 	)
 
 	getUserByEmailHandler := query.NewGetUserByEmailCommandHandler(userstore)
+	getUserByIDHandler := query.NewGetUserByIDCommandHandler(userstore)
 
-	return &Server{db, authSvc, createUserHandler, getUserByEmailHandler}, nil
+	return &Server{db, authSvc, createUserHandler, getUserByEmailHandler, getUserByIDHandler}, nil
 }
 
 func (s *Server) Run() error {
 	// serve static files
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("./internal/app/web/static"))))
 
-	authMw := middleware.NewAuthMw(s.authSvc)
+	authMw := middleware.NewAuthMw(s.authSvc, s.getUserByIDHandler)
 
 	http.Handle("/", authMw.AuthMiddleware(http.HandlerFunc(s.handleIndex)))
 	http.HandleFunc("GET /register", s.handleRegister)
