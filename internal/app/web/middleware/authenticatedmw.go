@@ -22,8 +22,6 @@ func NewAuthenticatedMw() *AuthenticatedMw {
 
 func (a *AuthenticatedMw) AuthenticatedMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		fmt.Println("Hello from authenticated middleware")
-
 		authmwdata, ok := r.Context().Value(AuthDatacontextKey).(AuthMwData)
 
 		var user *entity.User
