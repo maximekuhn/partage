@@ -12,49 +12,39 @@ concurrency:
 
 env:
   GO_VERSION: "1.23"
+  GO_TASK_VERSION: "v3.39.2"
+  GO_TEMPL_VERSION: "v0.2.778"
+  GO_CI_LINT_VERSION: "v1.61"
 
 jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - uses: actions/setup-go@v5
-        with:
-          go-version: ${{ env.GO_VERSION }}
-
+      - run: ./ci/install_tools.sh ${{ env.GO_VERSION }} ${{ env.GO_TASK_VERSION }} ${{ env.GO_TEMPL_VERSION }}
+      - run: echo "$HOME/go/bin" >> "$GITHUB_PATH"
+        # project must be built to generate templ files,
+        # otherwise the linter will report an issue about
+        # unexisting symbols in package 'views'
+      - run: task build
       - uses: golangci/golangci-lint-action@v6
         with:
-          version: v1.61
+          version: ${{ env.GO_CI_LINT_VERSION }}
 
   test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - uses: actions/setup-go@v5
-        with:
-          go-version: ${{ env.GO_VERSION }}
-
-      - name: install go-task
-        # https://taskfile.dev/installation/#install-script
-        run: sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d -b /usr/local/bin
-
+      - run: ./ci/install_tools.sh ${{ env.GO_VERSION }} ${{ env.GO_TASK_VERSION }} ${{ env.GO_TEMPL_VERSION }}
+      - run: echo "$HOME/go/bin" >> "$GITHUB_PATH"
       - run: task test
 
   fmtcheck:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - uses: actions/setup-go@v5
-        with:
-          go-version: ${{ env.GO_VERSION }}
-
-      - name: install go-task
-        # https://taskfile.dev/installation/#install-script
-        run: sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d -b /usr/local/bin
-
+      - run: ./ci/install_tools.sh ${{ env.GO_VERSION }} ${{ env.GO_TASK_VERSION }} ${{ env.GO_TEMPL_VERSION }}
+      - run: echo "$HOME/go/bin" >> "$GITHUB_PATH"
       - name: check go code format
         shell: bash
         run: | 
