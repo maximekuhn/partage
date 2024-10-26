@@ -152,5 +152,59 @@ func TestFindGroupByName(t *testing.T) {
 			}
 		})
 	}
+}
 
+func TestFindGroupsForUser(t *testing.T) {
+	db := CreateTmpDB()
+	defer db.Close()
+
+	s := NewSQLiteGroupStore(db)
+
+	userID := uuid.New()
+
+	g1 := createGroup("group - 1", userID, make([]uuid.UUID, 0))
+	g2 := createGroup("group - 2", uuid.New(), []uuid.UUID{userID})
+	g3 := createGroup("group - 3", uuid.New(), []uuid.UUID{uuid.New()})
+
+	ctx := context.TODO()
+
+	if err := s.Save(ctx, g1); err != nil {
+		panic(err)
+	}
+	if err := s.Save(ctx, g2); err != nil {
+		panic(err)
+	}
+	if err := s.Save(ctx, g3); err != nil {
+		panic(err)
+	}
+
+	uID, err := valueobject.NewUserID(userID)
+	if err != nil {
+		panic(err)
+	}
+
+	groups, err := s.FindAllForUserID(ctx, uID)
+	if err != nil {
+		t.Fatalf("FindAllForUserID(): expected ok got error '%s'", err)
+	}
+
+	if len(groups) != 2 {
+		t.Fatalf("FindAllForUserID(): expected to get 2 groups got %d", len(groups))
+	}
+
+	if !groupContains("group - 1", groups) {
+		t.Fatal("FindAllForUserID(): 'group - 1' not found in groups")
+	}
+	if !groupContains("group - 2", groups) {
+		t.Fatal("FindAllForUserID(): 'group - 2' not found in groups")
+	}
+}
+
+func groupContains(groupName string, groups []entity.Group) bool {
+	for _, g := range groups {
+		if g.Name.String() == groupName {
+			return true
+		}
+	}
+	return false
 }

@@ -10,4 +10,5 @@ import (
 type GroupStore interface {
 	Save(ctx context.Context, g *entity.Group) error
 	FindByName(ctx context.Context, name valueobject.Groupname) (*entity.Group, bool, error)
+	FindAllForUserID(ctx context.Context, userID valueobject.UserID) ([]entity.Group, error)
 }
