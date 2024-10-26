@@ -8,11 +8,12 @@ import (
 	"github.com/maximekuhn/partage/internal/app/web/views"
 	"github.com/maximekuhn/partage/internal/core/command"
 	"github.com/maximekuhn/partage/internal/core/entity"
+	"github.com/maximekuhn/partage/internal/core/query"
 	"github.com/maximekuhn/partage/internal/core/valueobject"
 )
 
 func (s *Server) handleCreateGroup(w http.ResponseWriter, r *http.Request) {
-	fmt.Printf("%s /group/create", r.Method)
+	fmt.Printf("%s /group/create\n", r.Method)
 	if r.Method != http.MethodPost {
 		http.Error(w, "", http.StatusMethodNotAllowed)
 		return
@@ -33,20 +34,29 @@ func (s *Server) handleCreateGroup(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	groups, err := s.getGroupsHandler.Handle(r.Context(), query.GetGroupsForUserQuery{
+		UserID: user.ID,
+	})
+
+	if err != nil {
+		// TODO: return to a common page '500 Internal Server Error'
+		groups = make([]entity.Group, 0)
+	}
+
 	if err := r.ParseForm(); err != nil {
-		_ = views.Page("Groups", user, views.Groups(user, "")).Render(ctx, w)
+		_ = views.Page("Groups", user, views.Groups(user, groups, "")).Render(ctx, w)
 		return
 	}
 
 	groupname, err := valueobject.NewGroupname(r.FormValue("group_name"))
 	if err != nil {
-		_ = views.Page("Groups", user, views.Groups(user, err.Error())).Render(ctx, w)
+		_ = views.Page("Groups", user, views.Groups(user, groups, err.Error())).Render(ctx, w)
 		return
 	}
 
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
-		_ = views.Page("Groups", user, views.Groups(user, "Something went wrong")).Render(ctx, w)
+		_ = views.Page("Groups", user, views.Groups(user, groups, "Something went wrong")).Render(ctx, w)
 		return
 	}
 
@@ -57,12 +67,12 @@ func (s *Server) handleCreateGroup(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		_ = tx.Rollback()
 		fmt.Printf("failed to create group: %s\n", err)
-		_ = views.Page("Groups", user, views.Groups(user, "Oops! Something went wrong and your group could not be created :(")).Render(ctx, w)
+		_ = views.Page("Groups", user, views.Groups(user, groups, "Oops! Something went wrong and your group could not be created :(")).Render(ctx, w)
 		return
 	}
 
 	if err := tx.Commit(); err != nil {
-		_ = views.Page("Groups", user, views.Groups(user, "Something went wrong")).Render(ctx, w)
+		_ = views.Page("Groups", user, views.Groups(user, groups, "Something went wrong")).Render(ctx, w)
 		return
 	}
 

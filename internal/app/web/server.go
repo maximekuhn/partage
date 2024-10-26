@@ -21,6 +21,7 @@ type Server struct {
 	getUserByEmailHandler *query.GetUserByEmailQueryHandler
 	getUserByIDHandler    *query.GetUserByIDQueryHandler
 	createGroupHandler    *command.CreateGroupCmdHandler
+	getGroupsHandler      *query.GetGroupsForUserQueryHandler
 }
 
 func NewServer(config ServerConfig) (*Server, error) {
@@ -66,6 +67,8 @@ func NewServer(config ServerConfig) (*Server, error) {
 		groupstore,
 	)
 
+	getGroupsHandler := query.NewGetGroupsForUserQueryHandler(groupstore)
+
 	return &Server{
 		db,
 		authSvc,
@@ -73,6 +76,7 @@ func NewServer(config ServerConfig) (*Server, error) {
 		getUserByEmailHandler,
 		getUserByIDHandler,
 		createGroupHandler,
+		getGroupsHandler,
 	}, nil
 }
 

@@ -6,6 +6,7 @@ import (
 	"github.com/maximekuhn/partage/internal/app/web/middleware"
 	"github.com/maximekuhn/partage/internal/app/web/views"
 	"github.com/maximekuhn/partage/internal/core/entity"
+	"github.com/maximekuhn/partage/internal/core/query"
 )
 
 func (s *Server) handleIndex(w http.ResponseWriter, r *http.Request) {
@@ -61,8 +62,19 @@ func (s *Server) handleGroups(w http.ResponseWriter, r *http.Request) {
 	if ok && authmwdata.Authenticated {
 		user = authmwdata.User
 	}
+	if user == nil {
+		panic("user is null, middleware should have returned earlier")
+	}
 
-	err := views.Page("Groups", user, views.Groups(user, "")).Render(r.Context(), w)
+	groups, err := s.getGroupsHandler.Handle(r.Context(), query.GetGroupsForUserQuery{
+		UserID: user.ID,
+	})
+	if err != nil {
+		// TODO: return to a common page '500 Internal Server Error'
+		groups = make([]entity.Group, 0)
+	}
+
+	err = views.Page("Groups", user, views.Groups(user, groups, "")).Render(r.Context(), w)
 	if err != nil {
 		http.Error(w, "", http.StatusInternalServerError)
 		return

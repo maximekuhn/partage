@@ -2,10 +2,14 @@ package views
 
 import "github.com/maximekuhn/partage/internal/core/entity"
 
-templ Groups(user *entity.User, errMsg string) {
+templ Groups(user *entity.User, groups []entity.Group, errMsg string) {
 	<div class="flex h-screen items-center justify-center">
 		<div>
-			<h1 class="text-center text-4xl font-bold mb-6">Create a new group</h1>
+			<div class="pb-20">
+				<h2 class="text-center text-4xl font-bold mb-6">My groups</h2>
+				@listGroups(groups)
+			</div>
+			<h2 class="text-center text-4xl font-bold mb-6">Create a new group</h2>
 			if errMsg != "" {
 				<div class="max-w-xs border-l-4 border-red-500 bg-red-100 p-4 text-red-700" role="alert">
 					<p class="font-bold">Error</p>
@@ -15,6 +19,18 @@ templ Groups(user *entity.User, errMsg string) {
 			@createGroupForm()
 		</div>
 	</div>
+}
+
+templ listGroups(groups []entity.Group) {
+	if len(groups) == 0 {
+		<p>No groups found</p>
+	} else {
+		<ul>
+			for _, g := range groups {
+				<li>{ g.Name.String() }</li>
+			}
+		</ul>
+	}
 }
 
 templ createGroupForm() {
