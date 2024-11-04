@@ -25,6 +25,7 @@ tasks:
   build:
     desc: Build all executables
     deps: [templ, tailwind]
+    aliases: [b]
     cmds:
       - go build -v -o bin/web cmd/web/main.go
 
@@ -37,6 +38,7 @@ tasks:
   "run:web":
     desc: Run webserver
     deps: [build]
+    aliases: [rw]
     cmds:
       - air
 

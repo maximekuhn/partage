@@ -83,12 +83,12 @@ func NewServer(config ServerConfig) (*Server, error) {
 func (s *Server) Run() error {
 	// serve static files
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("./internal/app/web/static"))))
+	http.HandleFunc("/favicon.ico", faviconHandler)
 
 	authMw := middleware.NewAuthMw(s.authSvc, s.getUserByIDHandler)
 	authenticatedMw := middleware.NewAuthenticatedMw()
 
 	http.Handle("/", authMw.AuthMiddleware(s.handleIndex))
-	http.Handle("/favicon.ico", http.NotFoundHandler())
 	http.HandleFunc("GET /register", s.handleRegister)
 	http.HandleFunc("POST /register", s.handleRegisterUser)
 	http.HandleFunc("GET /login", s.handleLogin)
@@ -100,4 +100,9 @@ func (s *Server) Run() error {
 	fmt.Println("server is up and running")
 
 	return http.ListenAndServe(":8000", nil)
+}
+
+func faviconHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("GET /favicon.ico")
+	http.ServeFile(w, r, "./internal/app/web/static/favicon.ico")
 }
