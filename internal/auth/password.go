@@ -5,6 +5,7 @@ type Password struct {
 }
 
 func NewPassword(password string) (Password, error) {
+	// TODO: checks (length, special characters, numbers, lower/uppercase, ...)
 	p := Password{password}
 	return p, nil
 }

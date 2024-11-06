@@ -1,6 +1,9 @@
 package auth
 
-import "testing"
+import (
+	"bytes"
+	"testing"
+)
 
 func TestBcrypt(t *testing.T) {
 	tests := []struct {
@@ -34,4 +37,27 @@ func TestBcrypt(t *testing.T) {
 		})
 	}
 
+}
+
+func TestSamePasswordDifferentHash(t *testing.T) {
+	p, err := NewPassword("Admin1234-secure")
+	if err != nil {
+		panic(err)
+	}
+
+	bcryptHasher := NewBcryptPasswordHasher()
+
+	h1, err := bcryptHasher.hash(p)
+	if err != nil {
+		t.Fatalf("hash(): expected ok got err %v", err)
+	}
+
+	h2, err := bcryptHasher.hash(p)
+	if err != nil {
+		t.Fatalf("hash(): expected ok got err %v", err)
+	}
+
+	if bytes.Equal(h1.hash, h2.hash) {
+		t.Fatalf("same password should produce different hashes")
+	}
 }
