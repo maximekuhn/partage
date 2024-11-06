@@ -124,7 +124,7 @@ func TestFindGroupByName(t *testing.T) {
 		t.Run(test.title, func(t *testing.T) {
 			groupname, err := valueobject.NewGroupname(test.groupname)
 			if err != nil {
-				panic(groupname)
+				panic(err)
 			}
 			g, found, err := s.FindByName(context.TODO(), groupname)
 			if err != nil {
@@ -193,10 +193,10 @@ func TestFindGroupsForUser(t *testing.T) {
 	}
 
 	if !groupContains("group - 1", groups) {
-		t.Fatal("FindAllForUserID(): 'group - 1' not found in groups")
+		t.Fatal("FindAllForUserID(): expected to find 'group - 1' but it is not the case")
 	}
 	if !groupContains("group - 2", groups) {
-		t.Fatal("FindAllForUserID(): 'group - 2' not found in groups")
+		t.Fatal("FindAllForUserID(): expected to find 'group - 2' but it is not the case")
 	}
 }
 

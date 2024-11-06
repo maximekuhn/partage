@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -20,15 +21,22 @@ func NewSQLiteGroupStore(db *sql.DB) *SQLiteGroupStore {
 }
 
 func (s *SQLiteGroupStore) FindByName(ctx context.Context, name valueobject.Groupname) (*entity.Group, bool, error) {
-	// TODO: handle members
 	query := `
-    SELECT id, owner, created_at FROM partage_group WHERE name = ?
+    SELECT pg.id,
+           pg.owner, 
+           pg.created_at,
+           GROUP_CONCAT(pgu.user_id)
+    FROM partage_group pg
+    INNER JOIN partage_group_user pgu ON pg.id = pgu.group_id
+    WHERE name = ?
+    GROUP BY pg.id, pg.owner
     `
 	var id uuid.UUID
 	var owner uuid.UUID
 	var created_at time.Time
+	var membersConcat string
 
-	err := s.db.QueryRowContext(ctx, query, name.String()).Scan(&id, &owner, &created_at)
+	err := s.db.QueryRowContext(ctx, query, name.String()).Scan(&id, &owner, &created_at, &membersConcat)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, false, nil
@@ -46,33 +54,19 @@ func (s *SQLiteGroupStore) FindByName(ctx context.Context, name valueobject.Grou
 		return nil, false, err
 	}
 
-	membersQuery := `
-    SELECT user_id FROM partage_group_user WHERE group_id = ?
-    `
-	rows, err := s.db.QueryContext(ctx, membersQuery, groupID.String())
-	defer func() { _ = rows.Close() }()
-
-	if err != nil {
-		return nil, false, err
-	}
-
+	memberIDs := strings.Split(membersConcat, ",")
 	members := make([]valueobject.UserID, 0)
-	for rows.Next() {
-		var userID uuid.UUID
-		if err := rows.Scan(&userID); err != nil {
-			return nil, false, err
-		}
-
-		if userID == owner {
-			continue
-		}
-
-		memberID, err := valueobject.NewUserID(userID)
+	for _, memberID := range memberIDs {
+		id, err := valueobject.NewUserIDFromString(memberID)
 		if err != nil {
 			return nil, false, err
 		}
 
-		members = append(members, memberID)
+		// ignore owner
+		if id == ownerID {
+			continue
+		}
+		members = append(members, id)
 	}
 
 	g := entity.NewGroup(groupID, name, members, ownerID, created_at)
