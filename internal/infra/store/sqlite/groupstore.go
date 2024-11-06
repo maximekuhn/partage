@@ -100,53 +100,65 @@ func (s *SQLiteGroupStore) Save(ctx context.Context, g *entity.Group) error {
 }
 
 func (s *SQLiteGroupStore) FindAllForUserID(ctx context.Context, userID valueobject.UserID) ([]entity.Group, error) {
-	idsQuery :=
-		`SELECT group_id FROM partage_group_user WHERE user_id = ?`
-	rows, err := s.db.QueryContext(ctx, idsQuery, userID.String())
+	query := `
+    SELECT pg.id,
+           pg.owner, 
+           pg.created_at,
+           pg.name, 
+           GROUP_CONCAT(pgu.user_id)
+    FROM partage_group pg
+    INNER JOIN partage_group_user pgu ON pg.id = pgu.group_id
+    WHERE pgu.user_id = ?
+    GROUP BY pg.id, pg.owner
+    `
+	rows, err := s.db.QueryContext(ctx, query, userID.String())
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	groupsID := make([]valueobject.GroupID, 0)
-	for rows.Next() {
-		var groupID string
-		if err := rows.Scan(&groupID); err != nil {
-			return nil, err
-		}
-		gid, err := valueobject.NewGroupIDFromString(groupID)
-		if err != nil {
-			return nil, err
-		}
-		groupsID = append(groupsID, gid)
-	}
-
 	groups := make([]entity.Group, 0)
-	for _, id := range groupsID {
-		// TODO: handle members
-		groupQuery :=
-			`SELECT name, owner, created_at FROM partage_group WHERE id = ?`
-
-		var name string
+	for rows.Next() {
+		var id uuid.UUID
 		var owner uuid.UUID
-		var createdAt time.Time
-
-		if err := s.db.QueryRowContext(ctx, groupQuery, id.String()).Scan(&name, &owner, &createdAt); err != nil {
+		var created_at time.Time
+		var name string
+		var membersConcat string
+		err = rows.Scan(&id, &owner, &created_at, &name, &membersConcat)
+		if err != nil {
 			return nil, err
 		}
-
-		gName, err := valueobject.NewGroupname(name)
+		groupID, err := valueobject.NewGroupID(id)
 		if err != nil {
 			return nil, err
 		}
 
-		gOwner, err := valueobject.NewUserID(owner)
+		ownerID, err := valueobject.NewUserID(owner)
 		if err != nil {
 			return nil, err
 		}
 
-		g := entity.NewGroup(id, gName, make([]valueobject.UserID, 0), gOwner, createdAt)
+		groupName, err := valueobject.NewGroupname(name)
+		if err != nil {
+			return nil, err
+		}
 
+		memberIDs := strings.Split(membersConcat, ",")
+		members := make([]valueobject.UserID, 0)
+		for _, memberID := range memberIDs {
+			id, err := valueobject.NewUserIDFromString(memberID)
+			if err != nil {
+				return nil, err
+			}
+
+			// ignore owner
+			if id == ownerID {
+				continue
+			}
+			members = append(members, id)
+		}
+
+		g := entity.NewGroup(groupID, groupName, members, ownerID, created_at)
 		groups = append(groups, *g)
 	}
 
