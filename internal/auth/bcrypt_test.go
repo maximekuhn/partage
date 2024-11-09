@@ -2,6 +2,7 @@ package auth
 
 import (
 	"bytes"
+	"math/rand"
 	"testing"
 )
 
@@ -59,5 +60,26 @@ func TestSamePasswordDifferentHash(t *testing.T) {
 
 	if bytes.Equal(h1.hash, h2.hash) {
 		t.Fatalf("same password should produce different hashes")
+	}
+}
+
+func TestHashPasswordTooLong(t *testing.T) {
+	// password length > 72 bytes (max length for bcrypt)
+	alphabet := []byte("abcdefghijklmnopqrstuvwxyz123456789!@#$%^&*)_+{}[]")
+
+	lengthToGenerate := 100
+	tooLongPassword := make([]byte, lengthToGenerate)
+	for i := 0; i < lengthToGenerate; i++ {
+		tooLongPassword[i] = alphabet[rand.Intn(len(alphabet))]
+	}
+
+	password, err := NewPassword(string(tooLongPassword))
+	if err != nil {
+		panic(err)
+	}
+
+	bcryptHasher := NewBcryptPasswordHasher()
+	if _, err := bcryptHasher.hash(password); err != nil {
+		t.Fatalf("hash(): expected ok got %v", err)
 	}
 }

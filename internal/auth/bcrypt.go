@@ -1,6 +1,8 @@
 package auth
 
 import (
+	"crypto/sha512"
+
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -11,7 +13,13 @@ func NewBcryptPasswordHasher() *BcryptPasswordHasher {
 }
 
 func (b *BcryptPasswordHasher) hash(p Password) (HashedPassword, error) {
-	hash, err := bcrypt.GenerateFromPassword([]byte(p.password), bcrypt.DefaultCost)
+	passwordBytes := []byte(p.password)
+	if len(passwordBytes) >= 72 {
+		hashedPasswordBytes := sha512.New().Sum(passwordBytes)
+		passwordBytes = hashedPasswordBytes[len(passwordBytes):]
+	}
+
+	hash, err := bcrypt.GenerateFromPassword(passwordBytes, bcrypt.DefaultCost)
 	h := HashedPassword{hash}
 	if err != nil {
 		return h, err
