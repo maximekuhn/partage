@@ -200,6 +200,85 @@ func TestFindGroupsForUser(t *testing.T) {
 	}
 }
 
+func TestFindGroupByID(t *testing.T) {
+	db := CreateTmpDB()
+	defer db.Close()
+
+	s := NewSQLiteGroupStore(db)
+
+	tests := []struct {
+		title              string
+		group              *entity.Group
+		shouldFindGroup    bool
+		idToUseForQuery    uuid.UUID
+		useGroupIDForQuery bool
+	}{
+		{
+			title:              "should not find group",
+			group:              createGroup("group 1", uuid.New(), []uuid.UUID{uuid.New(), uuid.New()}),
+			shouldFindGroup:    false,
+			idToUseForQuery:    uuid.New(),
+			useGroupIDForQuery: false,
+		},
+		{
+			title:              "should find group",
+			group:              createGroup("group 2", uuid.New(), []uuid.UUID{uuid.New(), uuid.New()}),
+			shouldFindGroup:    true,
+			idToUseForQuery:    [16]byte{},
+			useGroupIDForQuery: true,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.title, func(t *testing.T) {
+			var groupID valueobject.GroupID
+			var err error
+			if test.useGroupIDForQuery {
+				groupID = test.group.ID
+			} else {
+				groupID, err = valueobject.NewGroupID(test.idToUseForQuery)
+			}
+			if err != nil {
+				panic(err)
+			}
+
+			if test.shouldFindGroup {
+				if err = s.Save(context.TODO(), test.group); err != nil {
+					panic(err)
+				}
+			}
+
+			g, found, err := s.FindByID(context.TODO(), groupID)
+			if err != nil {
+				t.Fatalf("FindByID(): expected ok got error %v", err)
+			}
+
+			if !found && test.shouldFindGroup {
+				t.Fatalf("FindByID(): expected to find group but found nothing")
+			}
+
+			if !found && !test.shouldFindGroup {
+				return
+			}
+
+			// sort members for comparison
+			sort.Slice(g.Members, func(i, j int) bool {
+				return g.Members[i].String() < g.Members[j].String()
+			})
+
+			sort.Slice(test.group.Members, func(i, j int) bool {
+				return test.group.Members[i].String() < test.group.Members[j].String()
+			})
+
+			if !reflect.DeepEqual(g, test.group) {
+				t.Fatalf("FindByID(): expected group %v got %v", test.group, g)
+			}
+
+		})
+	}
+
+}
+
 func groupContains(groupName string, groups []entity.Group) bool {
 	for _, g := range groups {
 		if g.Name.String() == groupName {

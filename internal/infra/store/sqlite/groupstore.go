@@ -164,3 +164,56 @@ func (s *SQLiteGroupStore) FindAllForUserID(ctx context.Context, userID valueobj
 
 	return groups, nil
 }
+
+func (s *SQLiteGroupStore) FindByID(ctx context.Context, groupID valueobject.GroupID) (*entity.Group, bool, error) {
+	query := `
+    SELECT pg.name,
+           pg.owner, 
+           pg.created_at,
+           GROUP_CONCAT(pgu.user_id)
+    FROM partage_group pg
+    INNER JOIN partage_group_user pgu ON pg.id = pgu.group_id
+    WHERE pgu.group_id = ?
+    GROUP BY pg.id, pg.owner
+    `
+	var name string
+	var owner uuid.UUID
+	var created_at time.Time
+	var membersConcat string
+
+	err := s.db.QueryRowContext(ctx, query, groupID.String()).Scan(&name, &owner, &created_at, &membersConcat)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, false, nil
+		}
+		return nil, false, err
+	}
+
+	ownerID, err := valueobject.NewUserID(owner)
+	if err != nil {
+		return nil, false, err
+	}
+
+	groupname, err := valueobject.NewGroupname(name)
+	if err != nil {
+		return nil, false, err
+	}
+
+	memberIDs := strings.Split(membersConcat, ",")
+	members := make([]valueobject.UserID, 0)
+	for _, memberID := range memberIDs {
+		id, err := valueobject.NewUserIDFromString(memberID)
+		if err != nil {
+			return nil, false, err
+		}
+
+		// ignore owner
+		if id == ownerID {
+			continue
+		}
+		members = append(members, id)
+	}
+
+	g := entity.NewGroup(groupID, groupname, members, ownerID, created_at)
+	return g, true, nil
+}

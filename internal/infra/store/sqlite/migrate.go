@@ -28,6 +28,18 @@ func ApplyMigrations(db *sql.DB) error {
 		return err
 	}
 
+	if err := createExpenseTable(ctx, db); err != nil {
+		return err
+	}
+
+	if err := createExpenseGroupAssociationTable(ctx, db); err != nil {
+		return err
+	}
+
+	if err := createExpenseUserAssociationTable(ctx, db); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -81,6 +93,49 @@ func createGroupUserAssociationTable(ctx context.Context, db *sql.DB) error {
         user_id TEXT,
         PRIMARY KEY (group_id, user_id),
         FOREIGN KEY (group_id) REFERENCES partage_group(id) ON DELETE CASCADE,
+        FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE
+    )
+    `
+	_, err := db.ExecContext(ctx, query)
+	return err
+}
+
+func createExpenseTable(ctx context.Context, db *sql.DB) error {
+	query := `
+    CREATE TABLE IF NOT EXISTS expense (
+        id TEXT PRIMARY KEY,
+        label TEXT NOT NULL,
+        payer_id TEXT NOT NULL,
+        amount TEXT NOT NULL,
+        created_at DATE NOT NULL,
+        FOREIGN KEY (payer_id) REFERENCES user(id)
+    )
+    `
+	_, err := db.ExecContext(ctx, query)
+	return err
+}
+
+func createExpenseGroupAssociationTable(ctx context.Context, db *sql.DB) error {
+	query := `
+    CREATE TABLE IF NOT EXISTS expense_group(
+        expense_id TEXT,
+        group_id TEXT,
+        PRIMARY KEY (expense_id, group_id),
+        FOREIGN KEY (expense_id) REFERENCES expense(id) ON DELETE CASCADE,
+        FOREIGN KEY (group_id) REFERENCES partage_group(id) ON DELETE CASCADE
+    )
+    `
+	_, err := db.ExecContext(ctx, query)
+	return err
+}
+
+func createExpenseUserAssociationTable(ctx context.Context, db *sql.DB) error {
+	query := `
+    CREATE TABLE IF NOT EXISTS expense_user(
+        expense_id TEXT,
+        user_id TEXT,
+        PRIMARY KEY (expense_id, user_id),
+        FOREIGN KEY (expense_id) REFERENCES expense(id) ON DELETE CASCADE,
         FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE
     )
     `
