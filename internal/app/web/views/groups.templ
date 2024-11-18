@@ -1,6 +1,9 @@
 package views
 
-import "github.com/maximekuhn/partage/internal/core/entity"
+import (
+	"fmt"
+	"github.com/maximekuhn/partage/internal/core/entity"
+)
 
 templ Groups(user *entity.User, groups []entity.Group, errMsg string) {
 	<div class="flex h-screen items-center justify-center">
@@ -27,7 +30,7 @@ templ listGroups(groups []entity.Group) {
 	} else {
 		<ul>
 			for _, g := range groups {
-				<li>{ g.Name.String() }</li>
+				<li><a href={ templ.SafeURL(fmt.Sprintf("/group/%s", g.ID)) }>{ g.Name.String() }</a></li>
 			}
 		</ul>
 	}

@@ -23,3 +23,16 @@ func NewGroup(
 ) *Group {
 	return &Group{id, name, members, owner, createdAt.UTC()}
 }
+
+// ContainsUser returns true if the user is either the owner or a member
+func (g *Group) ContainsUser(userID valueobject.UserID) bool {
+	if userID == g.Owner {
+		return true
+	}
+	for _, member := range g.Members {
+		if member == userID {
+			return true
+		}
+	}
+	return false
+}

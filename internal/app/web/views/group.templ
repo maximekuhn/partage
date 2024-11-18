@@ -1,0 +1,13 @@
+package views
+
+import "github.com/maximekuhn/partage/internal/core/entity"
+
+templ Group(group *entity.Group) {
+	<div>
+		group: { group.Name.String() }
+		<br/>
+		owner: { group.Owner.String() }
+		<br/>
+		total amount: TODO
+	</div>
+}

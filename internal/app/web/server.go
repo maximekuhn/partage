@@ -22,6 +22,7 @@ type Server struct {
 	getUserByIDHandler    *query.GetUserByIDQueryHandler
 	createGroupHandler    *command.CreateGroupCmdHandler
 	getGroupsHandler      *query.GetGroupsForUserQueryHandler
+	getGroupHandler       *query.GetGroupQueryHandler
 }
 
 func NewServer(config ServerConfig) (*Server, error) {
@@ -68,6 +69,7 @@ func NewServer(config ServerConfig) (*Server, error) {
 	)
 
 	getGroupsHandler := query.NewGetGroupsForUserQueryHandler(groupstore)
+	getGroupHandler := query.NewGetGroupQueryHandler(groupstore)
 
 	return &Server{
 		db,
@@ -77,6 +79,7 @@ func NewServer(config ServerConfig) (*Server, error) {
 		getUserByIDHandler,
 		createGroupHandler,
 		getGroupsHandler,
+		getGroupHandler,
 	}, nil
 }
 
@@ -87,6 +90,7 @@ func (s *Server) Run() error {
 
 	authMw := middleware.NewAuthMw(s.authSvc, s.getUserByIDHandler)
 	authenticatedMw := middleware.NewAuthenticatedMw()
+	userInGroupMw := middleware.NewUserInGroupMw(s.getGroupHandler)
 
 	http.Handle("/", authMw.AuthMiddleware(s.handleIndex))
 	http.HandleFunc("GET /register", s.handleRegister)
@@ -95,6 +99,7 @@ func (s *Server) Run() error {
 	http.HandleFunc("POST /login", s.handleLoginUser)
 	http.Handle("POST /logout", authMw.AuthMiddleware(s.handleLogoutUser))
 	http.Handle("GET /group", authMw.AuthMiddleware(authenticatedMw.AuthenticatedMiddleware(s.handleGroups)))
+	http.Handle("GET /group/{id}", authMw.AuthMiddleware(authenticatedMw.AuthenticatedMiddleware(userInGroupMw.UserInGroupMiddleware(s.handleGroup))))
 	http.Handle("POST /group/create", authMw.AuthMiddleware(authenticatedMw.AuthenticatedMiddleware(s.handleCreateGroup)))
 
 	fmt.Println("server is up and running")
