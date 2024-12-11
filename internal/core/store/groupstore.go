@@ -12,4 +12,5 @@ type GroupStore interface {
 	FindByID(ctx context.Context, groupID valueobject.GroupID) (*entity.Group, bool, error)
 	FindByName(ctx context.Context, name valueobject.Groupname) (*entity.Group, bool, error)
 	FindAllForUserID(ctx context.Context, userID valueobject.UserID) ([]entity.Group, error)
+	FindAllUsersInGroup(ctx context.Context, groupID valueobject.GroupID) ([]entity.Group, error)
 }

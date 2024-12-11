@@ -217,3 +217,7 @@ func (s *SQLiteGroupStore) FindByID(ctx context.Context, groupID valueobject.Gro
 	g := entity.NewGroup(groupID, groupname, members, ownerID, created_at)
 	return g, true, nil
 }
+
+func (s *SQLiteGroupStore) FindAllUsersInGroup(ctx context.Context, groupID valueobject.GroupID) ([]entity.Group, error) {
+	return nil, errors.New("TODO: implement me")
+}
