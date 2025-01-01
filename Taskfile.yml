@@ -58,3 +58,9 @@ tasks:
     desc: Check if the go code is formatted
     cmds:
       - gofmt -l -s .
+
+  playwright:
+    desc: Run playwright tests (E2E)
+    aliases: [e2e]
+    cmds:
+      - npx playwright test

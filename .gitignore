@@ -3,4 +3,7 @@
 /tmp
 *_templ.go
 /internal/app/web/static/output.css
-
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/

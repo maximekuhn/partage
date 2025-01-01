@@ -6,7 +6,7 @@ templ Login(errMsg, msg string) {
 			<h1 class="mb-6 text-center text-4xl font-bold">Sign in</h1>
 			if msg != "" {
 				<div class="max-w-xs border-l-4 border-green-500 bg-green-100 p-4 text-green-700" role="alert">
-					<p class="text-center">{ msg }</p>
+					<p class="text-center" id="login-page-msg">{ msg }</p>
 				</div>
 			}
 			if errMsg != "" {
