@@ -107,3 +107,8 @@ func (s *SQLiteUserStore) GetByEmail(ctx context.Context, email valueobject.Emai
 
 	return u, true, nil
 }
+
+func (s *SQLiteUserStore) SelectAllInGroup(ctx context.Context, groupID valueobject.GroupID) ([]*entity.User, error) {
+	// TODO: implement
+	return nil, nil
+}

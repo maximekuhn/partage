@@ -1,12 +1,12 @@
 package views
 
-import "github.com/maximekuhn/partage/internal/core/entity"
+import "github.com/maximekuhn/partage/internal/core/query"
 
-templ Group(group *entity.Group) {
+templ Group(group *query.GroupDetails) {
 	<div>
-		group: { group.Name.String() }
+		group: { group.GroupName.String() }
 		<br/>
-		owner: { group.Owner.String() }
+		owner: { group.Owner.Email.String() }
 		<br/>
 		total amount: TODO
 	</div>

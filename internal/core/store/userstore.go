@@ -16,4 +16,5 @@ type UserStore interface {
 	Save(ctx context.Context, u *entity.User) error
 	GetByID(ctx context.Context, id valueobject.UserID) (*entity.User, bool, error)
 	GetByEmail(ctx context.Context, email valueobject.Email) (*entity.User, bool, error)
+	SelectAllInGroup(ctx context.Context, groupID valueobject.GroupID) ([]*entity.User, error)
 }

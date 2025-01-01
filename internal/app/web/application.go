@@ -12,14 +12,15 @@ import (
 )
 
 type application struct {
-	db                    *sql.DB
-	AuthService           *auth.AuthService
-	CreateUserHandler     *command.CreateUserHandler
-	GetUserByEmailHandler *query.GetUserByEmailQueryHandler
-	GetUserByIDHandler    *query.GetUserByIDQueryHandler
-	CreateGroupHandler    *command.CreateGroupCmdHandler
-	GetGroupsHandler      *query.GetGroupsForUserQueryHandler
-	GetGroupHandler       *query.GetGroupQueryHandler
+	db                     *sql.DB
+	AuthService            *auth.AuthService
+	CreateUserHandler      *command.CreateUserHandler
+	GetUserByEmailHandler  *query.GetUserByEmailQueryHandler
+	GetUserByIDHandler     *query.GetUserByIDQueryHandler
+	CreateGroupHandler     *command.CreateGroupCmdHandler
+	GetGroupsHandler       *query.GetGroupsForUserQueryHandler
+	GetGroupHandler        *query.GetGroupQueryHandler
+	GetGroupDetailsHandler *query.GetGroupDetailsQueryHandler
 }
 
 func newApplication(dbFilepath, jwtSignatureKey string) (*application, error) {
@@ -47,28 +48,28 @@ func newApplication(dbFilepath, jwtSignatureKey string) (*application, error) {
 		jwtHelper,
 	)
 
-	// other stores and command/query handlers
+	// stores
 	userstore := sqlite.NewSQLiteUserStore(db)
+	groupstore := sqlite.NewSQLiteGroupStore(db)
+	expensestore := sqlite.NewSQLiteExpenseStore(db)
 
+	// commands handlers
 	createUserHandler := command.NewCreateUserHandler(
 		&misc.UserIDProviderProd{},
 		&misc.DatetimeProviderProd{},
-		userstore,
-	)
-
-	getUserByEmailHandler := query.NewGetUserByEmailCommandHandler(userstore)
-	getUserByIDHandler := query.NewGetUserByIDCommandHandler(userstore)
-
-	groupstore := sqlite.NewSQLiteGroupStore(db)
+		userstore)
 
 	createGroupHandler := command.NewCreateGroupCmdHandler(
 		&misc.GroupIDProviderProd{},
 		&misc.DatetimeProviderProd{},
-		groupstore,
-	)
+		groupstore)
 
+	// queries handlers
+	getUserByEmailHandler := query.NewGetUserByEmailCommandHandler(userstore)
+	getUserByIDHandler := query.NewGetUserByIDCommandHandler(userstore)
 	getGroupsHandler := query.NewGetGroupsForUserQueryHandler(groupstore)
 	getGroupHandler := query.NewGetGroupQueryHandler(groupstore)
+	getGroupDetailsHandler := query.NewGetGroupDetailsQueryHandler(groupstore, userstore, expensestore)
 
 	return &application{
 		db,
@@ -79,6 +80,7 @@ func newApplication(dbFilepath, jwtSignatureKey string) (*application, error) {
 		createGroupHandler,
 		getGroupsHandler,
 		getGroupHandler,
+		getGroupDetailsHandler,
 	}, nil
 }
 

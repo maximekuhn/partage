@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/maximekuhn/partage/internal/core/entity"
+	"github.com/maximekuhn/partage/internal/core/valueobject"
 )
 
 type SQLiteExpenseStore struct {
@@ -52,4 +53,9 @@ func (s *SQLiteExpenseStore) Save(ctx context.Context, e *entity.Expense) error 
 	}
 
 	return nil
+}
+
+func (s *SQLiteExpenseStore) GetAllForGroup(ctx context.Context, groupID valueobject.GroupID) ([]*entity.Expense, error) {
+	// TODO: implement
+	return nil, nil
 }

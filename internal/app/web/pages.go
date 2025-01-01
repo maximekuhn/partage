@@ -98,7 +98,7 @@ func (s *Server) handleGroup(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	g, found, err := s.app.GetGroupHandler.Handle(r.Context(), query.GetGroupQuery{
+	g, found, err := s.app.GetGroupDetailsHandler.Handle(r.Context(), query.GetGroupDetailsQuery{
 		GroupID: groupID,
 	})
 	if err != nil {
