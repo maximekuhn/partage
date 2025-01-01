@@ -13,7 +13,7 @@ test("register form works", async ({ page }) => {
     await page.goto("http://localhost:8000");
     await page.getByRole("link", { name: "Sign up" }).click();
 
-    // fill out login form
+    // fill out register form
     const nickname = generateRandomName();
     const email = generateEmail(nickname);
     const password = "VerySecurePassword1234!@";
