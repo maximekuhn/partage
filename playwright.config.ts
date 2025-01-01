@@ -75,7 +75,7 @@ export default defineConfig({
         // we could use 'task run:web', but this requires installing air in
         // the CI too.
         command: 'task build && ./bin/web',
-        url: 'http://127.0.0.1:8000',
+        port: 8000,
         reuseExistingServer: true,
     },
 });

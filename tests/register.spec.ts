@@ -2,7 +2,7 @@ import { test, expect } from "@playwright/test";
 import { generateEmail, generateRandomName } from "./utils/user";
 
 test("sign up button works", async ({ page }) => {
-    await page.goto("http://localhost:8000");
+    await page.goto("/");
     await page.getByRole("link", { name: "Sign up" }).click();
     await expect(page).toHaveTitle(/Register/);
     await expect(page).toHaveURL(/register/);
@@ -10,7 +10,7 @@ test("sign up button works", async ({ page }) => {
 
 
 test("register form works", async ({ page }) => {
-    await page.goto("http://localhost:8000");
+    await page.goto("/");
     await page.getByRole("link", { name: "Sign up" }).click();
 
     // fill out register form
