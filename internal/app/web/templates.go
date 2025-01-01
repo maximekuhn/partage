@@ -67,7 +67,7 @@ func (s *Server) handleGroups(w http.ResponseWriter, r *http.Request) {
 		panic("user is null, middleware should have returned earlier")
 	}
 
-	groups, err := s.getGroupsHandler.Handle(r.Context(), query.GetGroupsForUserQuery{
+	groups, err := s.app.GetGroupsHandler.Handle(r.Context(), query.GetGroupsForUserQuery{
 		UserID: user.ID,
 	})
 	if err != nil {
@@ -98,7 +98,7 @@ func (s *Server) handleGroup(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	g, found, err := s.getGroupHandler.Handle(r.Context(), query.GetGroupQuery{
+	g, found, err := s.app.GetGroupHandler.Handle(r.Context(), query.GetGroupQuery{
 		GroupID: groupID,
 	})
 	if err != nil {

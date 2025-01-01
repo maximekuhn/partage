@@ -34,7 +34,7 @@ func (s *Server) handleCreateGroup(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	groups, err := s.getGroupsHandler.Handle(r.Context(), query.GetGroupsForUserQuery{
+	groups, err := s.app.GetGroupsHandler.Handle(r.Context(), query.GetGroupsForUserQuery{
 		UserID: user.ID,
 	})
 
@@ -54,13 +54,13 @@ func (s *Server) handleCreateGroup(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tx, err := s.db.BeginTx(ctx, nil)
+	tx, err := s.app.BeginTx(ctx)
 	if err != nil {
 		_ = views.Page("Groups", user, views.Groups(user, groups, "Something went wrong")).Render(ctx, w)
 		return
 	}
 
-	_, err = s.createGroupHandler.Handle(ctx, command.CreateGroupCmd{
+	_, err = s.app.CreateGroupHandler.Handle(ctx, command.CreateGroupCmd{
 		Name:  groupname,
 		Owner: user.ID,
 	})

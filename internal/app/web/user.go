@@ -57,7 +57,7 @@ func (s *Server) handleRegisterUser(w http.ResponseWriter, r *http.Request) {
 		_ = views.Page("Register", nil, views.Register("Password and confirmation don't match")).Render(ctx, w)
 		return
 	}
-	hashedPassword, err := s.authSvc.Hash(password)
+	hashedPassword, err := s.app.AuthService.Hash(password)
 	if err != nil {
 		_ = views.Page("Register", nil, views.Register("Something went wrong :( Please try again")).Render(ctx, w)
 		return
@@ -68,13 +68,13 @@ func (s *Server) handleRegisterUser(w http.ResponseWriter, r *http.Request) {
 		Nickname: nickname,
 	}
 
-	tx, err := s.db.BeginTx(ctx, nil)
+	tx, err := s.app.BeginTx(ctx)
 	if err != nil {
 		_ = views.Page("Register", nil, views.Register("Something went wrong :( Please try again")).Render(ctx, w)
 		return
 	}
 
-	userID, err := s.createUserHandler.Handle(ctx, cmd)
+	userID, err := s.app.CreateUserHandler.Handle(ctx, cmd)
 	if err != nil {
 		_ = tx.Rollback()
 		// TODO: error can be user's fault
@@ -82,7 +82,7 @@ func (s *Server) handleRegisterUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := s.authSvc.Save(ctx, userID, hashedPassword); err != nil {
+	if err := s.app.AuthService.Save(ctx, userID, hashedPassword); err != nil {
 		_ = tx.Rollback()
 		// XXX: can it be user's fault here too?
 		_ = views.Page("Register", nil, views.Register("Something went wrong :( Please try again")).Render(ctx, w)
@@ -126,7 +126,7 @@ func (s *Server) handleLoginUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	u, found, err := s.getUserByEmailHandler.Handle(ctx, query.GetUserByEmailQuery{
+	u, found, err := s.app.GetUserByEmailHandler.Handle(ctx, query.GetUserByEmailQuery{
 		Email: email,
 	})
 	if err != nil {
@@ -138,14 +138,14 @@ func (s *Server) handleLoginUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	authenticated := s.authSvc.Authenticate(ctx, u.ID, password)
+	authenticated := s.app.AuthService.Authenticate(ctx, u.ID, password)
 
 	if !authenticated {
 		_ = views.Page("Login", nil, views.Login("Invalid credentials or account not found", "")).Render(ctx, w)
 		return
 	}
 
-	jwt, err := s.authSvc.GenerateJWT(u.ID)
+	jwt, err := s.app.AuthService.GenerateJWT(u.ID)
 	if err != nil {
 		_ = views.Page("Login", nil, views.Login("Something went wrong :( Please try again later.", "")).Render(ctx, w)
 		return
