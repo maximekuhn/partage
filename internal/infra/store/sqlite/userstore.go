@@ -109,6 +109,52 @@ func (s *SQLiteUserStore) GetByEmail(ctx context.Context, email valueobject.Emai
 }
 
 func (s *SQLiteUserStore) SelectAllInGroup(ctx context.Context, groupID valueobject.GroupID) ([]*entity.User, error) {
-	// TODO: implement
-	return nil, nil
+	query := `
+    SELECT id, nickname, email, created_at
+    FROM user u
+    INNER JOIN partage_group_user pgu ON u.id = pgu.user_id
+    WHERE pgu.group_id = ?
+    `
+
+	rows, err := s.db.QueryContext(ctx, query, groupID.String())
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	members := make([]*entity.User, 0)
+	for rows.Next() {
+		var id uuid.UUID
+		var nickname string
+		var email string
+		var createdAt time.Time
+
+		err = rows.Scan(&id, &nickname, &email, &createdAt)
+		if err != nil {
+			return nil, err
+		}
+
+		u, err := tryConvertUser(id, nickname, email, createdAt)
+		if err != nil {
+			return nil, err
+		}
+		members = append(members, u)
+	}
+	return members, nil
+}
+
+func tryConvertUser(id uuid.UUID, nickname, email string, createdAt time.Time) (*entity.User, error) {
+	userID, err := valueobject.NewUserID(id)
+	if err != nil {
+		return nil, err
+	}
+	userNickname, err := valueobject.NewNickname(nickname)
+	if err != nil {
+		return nil, err
+	}
+	userEmail, err := valueobject.NewEmail(email)
+	if err != nil {
+		return nil, err
+	}
+	return entity.NewUser(userID, userEmail, userNickname, createdAt), nil
 }

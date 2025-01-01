@@ -4,7 +4,10 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"strings"
+	"time"
 
+	"github.com/google/uuid"
 	"github.com/maximekuhn/partage/internal/core/entity"
 	"github.com/maximekuhn/partage/internal/core/valueobject"
 )
@@ -56,6 +59,86 @@ func (s *SQLiteExpenseStore) Save(ctx context.Context, e *entity.Expense) error 
 }
 
 func (s *SQLiteExpenseStore) GetAllForGroup(ctx context.Context, groupID valueobject.GroupID) ([]*entity.Expense, error) {
-	// TODO: implement
-	return nil, nil
+	query := `
+    SELECT e.id, e.label, e.payer_id, e.amount, e.created_at, GROUP_CONCAT(eu.user_id)
+    FROM expense e
+    INNER JOIN expense_group eg ON e.id = eg.expense_id
+    INNER JOIN expense_user eu ON e.id = eu.user_id
+    WHERE eg.group_id = ?
+    GROUP BY e.id
+    `
+	rows, err := s.db.QueryContext(ctx, query, groupID.String())
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	expenses := make([]*entity.Expense, 0)
+	for rows.Next() {
+		var expenseID uuid.UUID
+		var label string
+		var payerID uuid.UUID
+		var amount string
+		var createdAt time.Time
+		var participantsConcat string
+
+		err = rows.Scan(&expenseID, &label, &payerID, &amount, &createdAt,
+			&participantsConcat)
+		if err != nil {
+			return nil, err
+		}
+
+		exp, err := tryConvertExpense(expenseID, label, payerID, amount,
+			createdAt, participantsConcat, groupID)
+		if err != nil {
+			return nil, err
+		}
+		expenses = append(expenses, exp)
+	}
+	return expenses, nil
+}
+
+func tryConvertExpense(
+	expenseID uuid.UUID,
+	label string,
+	payerID uuid.UUID,
+	amount string,
+	createdAt time.Time,
+	participantsConcat string,
+	groupID valueobject.GroupID,
+) (*entity.Expense, error) {
+	expID, err := valueobject.NewExpenseID(expenseID)
+	if err != nil {
+		return nil, err
+	}
+	expLabel, err := valueobject.NewExpenseLabel(label)
+	if err != nil {
+		return nil, err
+	}
+	expPayerID, err := valueobject.NewUserID(payerID)
+	if err != nil {
+		return nil, err
+	}
+	expAmount, err := tryConvertAmount(amount)
+	if err != nil {
+		return nil, err
+	}
+
+	participants := strings.Split(participantsConcat, ",")
+	expParticipants := make([]valueobject.UserID, 0)
+	for _, p := range participants {
+		expParticipantID, err := valueobject.NewUserIDFromString(p)
+		if err != nil {
+			return nil, err
+		}
+		expParticipants = append(expParticipants, expParticipantID)
+	}
+
+	return entity.NewExpense(expID, expLabel, expPayerID, expParticipants,
+		expAmount, createdAt, groupID), nil
+}
+
+func tryConvertAmount(amount string) (valueobject.Amount, error) {
+	a := valueobject.Amount{}
+	return a, nil
 }

@@ -1,6 +1,7 @@
 package web
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/maximekuhn/partage/internal/app/web/middleware"
@@ -102,6 +103,7 @@ func (s *Server) handleGroup(w http.ResponseWriter, r *http.Request) {
 		GroupID: groupID,
 	})
 	if err != nil {
+		fmt.Printf("err: %v\n", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
