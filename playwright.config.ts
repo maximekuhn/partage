@@ -72,7 +72,9 @@ export default defineConfig({
 
     /* Run your local dev server before starting the tests */
     webServer: {
-        command: 'task run:web',
+        // we could use 'task run:web', but this requires installing air in
+        // the CI too.
+        command: 'task build && ./bin/web',
         url: 'http://127.0.0.1:8000',
         reuseExistingServer: true,
     },
