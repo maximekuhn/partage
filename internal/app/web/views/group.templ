@@ -1,6 +1,9 @@
 package views
 
-import "github.com/maximekuhn/partage/internal/core/query"
+import (
+	"fmt"
+	"github.com/maximekuhn/partage/internal/core/query"
+)
 
 templ Group(group *query.GroupDetails) {
 	<div>
@@ -8,6 +11,6 @@ templ Group(group *query.GroupDetails) {
 		<br/>
 		owner: { group.Owner.Email.String() }
 		<br/>
-		total amount: TODO
+		total amount: { fmt.Sprintf("%.2f €", group.TotalAmount()) }
 	</div>
 }

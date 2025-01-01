@@ -3,7 +3,9 @@ package sqlite
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
+	"strconv"
 	"strings"
 	"time"
 
@@ -140,5 +142,13 @@ func tryConvertExpense(
 
 func tryConvertAmount(amount string) (valueobject.Amount, error) {
 	a := valueobject.Amount{}
-	return a, nil
+	parts := strings.Split(amount, "#")
+	if len(parts) != 2 {
+		return a, errors.New("unexpected amount format")
+	}
+	af64, err := strconv.ParseFloat(parts[0], 64)
+	if err != nil {
+		return a, err
+	}
+	return valueobject.NewAmount(af64, parts[1])
 }
