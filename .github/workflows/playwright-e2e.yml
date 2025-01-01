@@ -1,0 +1,37 @@
+name: Playwright E2E Tests
+
+on:
+  push:
+    branches: main
+  pull_request:
+    branches: main
+
+env:
+  GO_VERSION: "1.23"
+  GO_TASK_VERSION: "v3.39.2"
+  GO_TEMPL_VERSION: "v0.2.778"
+  GO_CI_LINT_VERSION: "v1.61"
+
+jobs:
+  test:
+    timeout-minutes: 60
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+    - run: ./ci/install_tools.sh ${{ env.GO_VERSION }} ${{ env.GO_TASK_VERSION }} ${{ env.GO_TEMPL_VERSION }}
+    - run: echo "$HOME/go/bin" >> "$GITHUB_PATH"
+    - uses: actions/setup-node@v4
+      with:
+        node-version: lts/*
+    - name: Install dependencies
+      run: npm ci
+    - name: Install Playwright Browsers
+      run: npx playwright install --with-deps
+    - name: Run Playwright tests
+      run: npx playwright test
+    - uses: actions/upload-artifact@v4
+      if: ${{ !cancelled() }}
+      with:
+        name: playwright-report
+        path: playwright-report/
+        retention-days: 30
