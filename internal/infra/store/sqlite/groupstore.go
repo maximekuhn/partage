@@ -99,6 +99,10 @@ func (s *SQLiteGroupStore) Save(ctx context.Context, g *entity.Group) error {
 	return err
 }
 
+func (s *SQLiteGroupStore) Update(ctx context.Context, g *entity.Group) error {
+	return errors.New("not yet implemented")
+}
+
 func (s *SQLiteGroupStore) FindAllForUserID(ctx context.Context, userID valueobject.UserID) ([]entity.Group, error) {
 	query := `
     SELECT pg.id,

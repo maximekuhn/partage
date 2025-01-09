@@ -15,9 +15,13 @@ type Invitation struct {
 	GroupID   GroupID
 	Status    InvitationStatus
 	CreatedAt time.Time
-	UpdatedAt time.Time // accepted or rejected
+	UpdatedAt time.Time // accepted or rejected time
 }
 
 func NewInvitation(userID UserID, groupID GroupID, status InvitationStatus, createdAt, updatedAt time.Time) Invitation {
 	return Invitation{userID, groupID, status, createdAt.UTC(), updatedAt.UTC()}
+}
+
+func (i Invitation) IsPending() bool {
+	return i.Status == InvitationStatusPending
 }
