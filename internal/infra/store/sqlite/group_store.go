@@ -100,6 +100,7 @@ func (s *SQLiteGroupStore) Save(ctx context.Context, g *entity.Group) error {
 }
 
 func (s *SQLiteGroupStore) Update(ctx context.Context, g *entity.Group) error {
+	// FIXME: only members are currently updated
 	return errors.New("not yet implemented")
 }
 
